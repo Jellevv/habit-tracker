@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@webtui/css@0.0.5/dist/full.css">
+</head>
+
+<body>
+
+<div class="box">
+
+<h1>🎮 Habit Tracker RPG</h1>
+
+</div>
+
+<div class="container">
+
+<!-- LEFT SIDE -->
+
+<div>
+
+<div class="box">
+
+<h2>Habits</h2>
+
+<button class="button" onclick="addHabit()">
+Add Habit
+</button>
+
+<ul id="habitList"></ul>
+
+</div>
+
+</div>
+
+<!-- RIGHT SIDE -->
+
+<div>
+
+<div class="box">
+
+<h2>Stats</h2>
+
+<p id="xpDisplay">
+XP: 0
+</p>
+
+<p id="streakDisplay">
+Streak: 0 🔥
+</p>
+
+</div>
+
+<div class="box">
+
+<h2>Skill Tree</h2>
+
+<p id="healthSkill"></p>
+<p id="productivitySkill"></p>
+<p id="personalSkill"></p>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+
+
+</html>

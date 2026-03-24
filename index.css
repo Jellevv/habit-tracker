@@ -1,0 +1,94 @@
+@layer base, utils, components;
+@import 'https://cdn.jsdelivr.net/npm/@webtui/css@0.1.6/dist/base.css';
+/* Utils */
+@import 'https://cdn.jsdelivr.net/npm/@webtui/css@0.1.6/dist/utils/box.css';
+/* Components */
+@import 'https://cdn.jsdelivr.net/npm/@webtui/css@0.1.6/dist/components/button.css';
+@import 'https://cdn.jsdelivr.net/npm/@webtui/css@0.1.6/dist/components/typography.css';
+
+body {
+
+padding: 20px;
+
+font-family: monospace;
+
+}
+
+.container {
+
+display: grid;
+
+grid-template-columns: 2fr 1fr;
+
+gap: 20px;
+
+}
+
+.box {
+
+padding: 15px;
+
+margin-bottom: 15px;
+
+}
+
+/* Habit list */
+
+#habitList {
+
+list-style: none;
+
+padding-left: 0;
+
+}
+
+#habitList li {
+
+margin-bottom: 15px;
+
+}
+
+/* Day boxes */
+
+.dayBox {
+
+cursor: pointer;
+
+display: inline-block;
+
+margin: 3px;
+
+padding: 5px;
+
+min-width: 30px;
+
+text-align: center;
+
+}
+
+.dayBox:hover {
+
+background-color: rgba(255,255,255,0.1);
+
+}
+
+.button {
+
+margin-left: 5px;
+
+margin-top: 5px;
+
+}
+
+/* Habit name */
+
+.habitName {
+
+font-weight: bold;
+
+display: block;
+
+margin-bottom: 5px;
+
+}
+
