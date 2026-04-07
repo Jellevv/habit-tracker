@@ -1,94 +1,266 @@
 @layer base, utils, components;
+
 @import 'https://cdn.jsdelivr.net/npm/@webtui/css@0.1.6/dist/base.css';
-/* Utils */
 @import 'https://cdn.jsdelivr.net/npm/@webtui/css@0.1.6/dist/utils/box.css';
-/* Components */
-@import 'https://cdn.jsdelivr.net/npm/@webtui/css@0.1.6/dist/components/button.css';
-@import 'https://cdn.jsdelivr.net/npm/@webtui/css@0.1.6/dist/components/typography.css';
+
+/* =====================
+   BASE
+===================== */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
 
 body {
-
-padding: 20px;
-
-font-family: monospace;
-
+    background: #0c0c0c;
+    color: #d4d4d4;
+    font-family: monospace;
+    height: 100dvh;
+    margin: 0;
+    overflow: hidden;
+    font-size: 18px;
+    line-height: 1.5;
 }
 
-.container {
+/* =====================
+   LAYOUT — 3-column grid
+===================== */
 
-display: grid;
-
-grid-template-columns: 2fr 1fr;
-
-gap: 20px;
-
+.layout {
+    display: grid;
+    grid-template-columns: 28% 16% 1fr;
+    grid-template-rows: 1fr auto;
+    height: 100dvh;
+    gap: 4px;
+    padding: 4px;
 }
 
-.box {
-
-padding: 15px;
-
-margin-bottom: 15px;
-
+.panel {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    padding: 8px 10px;
+    min-height: 0;
 }
 
-/* Habit list */
-
-#habitList {
-
-list-style: none;
-
-padding-left: 0;
-
+.panel::-webkit-scrollbar {
+    display: none;
 }
 
-#habitList li {
+/* =====================
+   HOTKEY BAR
+===================== */
 
-margin-bottom: 15px;
-
+.hotkeys {
+    grid-column: 1 / span 3;
+    white-space: pre;
+    font-size: 1rem;
+    padding: 4px 10px;
+    opacity: 0.6;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
 }
 
-/* Day boxes */
+/* =====================
+   FOCUS RING
+===================== */
 
-.dayBox {
-
-cursor: pointer;
-
-display: inline-block;
-
-margin: 3px;
-
-padding: 5px;
-
-min-width: 30px;
-
-text-align: center;
-
+.focused {
+    outline: 1px solid #ffffff;
 }
 
-.dayBox:hover {
+/* =====================
+   PANEL HEADINGS
+===================== */
 
-background-color: rgba(255,255,255,0.1);
-
+.panel-title {
+    font-size: 1.2rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
 }
 
-.button {
+/* =====================
+   FORM
+===================== */
 
-margin-left: 5px;
-
-margin-top: 5px;
-
+.formRow {
+    margin-bottom: 6px;
+    padding: 5px 7px;
+    border: 1px solid transparent;
+    border-radius: 0;
 }
 
-/* Habit name */
-
-.habitName {
-
-font-weight: bold;
-
-display: block;
-
-margin-bottom: 5px;
-
+.formRow.focused {
+    border: 1px solid #ffffff;
+    background: rgba(255, 255, 255, 0.04);
 }
 
+.formRow-label {
+    font-size: 1rem;
+    opacity: 0.6;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+/* =====================
+   HABIT LIST
+===================== */
+
+.habitItem {
+    padding: 3px 6px;
+    margin-bottom: 1px;
+    border: 1px solid transparent;
+}
+
+.habitSelected {
+    background: white;
+    color: black;
+}
+
+/* =====================
+   CALENDAR — shared
+===================== */
+
+.weekRow {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 2px;
+}
+
+.dayCell {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    text-align: center;
+    padding: 3px 1px;
+    cursor: default;
+    user-select: none;
+    aspect-ratio: 1;
+    max-width: 6rem;
+}
+
+/* Header row (day labels) */
+.dayHeader {
+    border-color: transparent;
+    background: transparent;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+    aspect-ratio: unset;
+    height: 18px;
+    padding: 0;
+    margin-block: 1rem;
+}
+
+.dayOutside {
+    opacity: 0.4;
+    border-color: #111;
+}
+
+.dayDisabled {
+    opacity: 0.4;
+    border-color: red;
+    color: red;
+}
+
+.dayFocused {
+    background: white;
+    color: black;
+    border-color: white;
+}
+
+.dayDone {
+    background: #0f2e0f;
+    border-color: #1d5e1d;
+    color: #6adb6a;
+}
+
+.dayDone.dayFocused {
+    background: white;
+    color: #1a4a1a;
+    border-color: white;
+    outline: 2px solid #3a9a3a;
+    outline-offset: -3px;
+}
+
+ .miniDay {
+    font-size: 18px;
+    opacity: 0.6;
+    display: block;
+}
+
+/* Scroll hints */
+.scrollHint {
+    text-align: center;
+    opacity: 0.6;
+    padding: 3px 0;
+    letter-spacing: 0.08em;
+}
+
+/* Calendar meta (progress, range) */
+.calendarMeta {
+    font-size: 1rem;
+    opacity: 0.6;
+    margin-bottom: 6px;
+    padding: 0 2px;
+    letter-spacing: 0.04em;
+}
+
+/* =====================
+   MINI WEEK (list view)
+===================== */
+
+.miniHabit {
+    margin-bottom: 12px;
+}
+
+.miniHabit-name {
+    font-size: 1rem;
+    margin-bottom: 3px;
+}
+
+.miniHabit-cat {
+    opacity: 0.8;
+    text-transform: uppercase;
+    margin-left: 1rem; 
+}
+
+/* =====================
+   SMALL SCREENS
+   Single-panel mode: only show focused panel
+===================== */
+
+@media (max-width: 820px) {
+    .layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+    }
+
+    .panel {
+        display: none;
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .panel.focused {
+        display: block;
+    }
+
+    .hotkeys {
+        grid-column: 1;
+        grid-row: 2;
+        display: block;
+    }
+
+    .dayCell {
+        font-size: 10px;
+        max-width: 48px;
+    }
+}
