@@ -16,7 +16,7 @@ let selectedDays =
 
 let duration = 7;
 
-let category = "Health";
+let category = "Intelligence";
 
 let modus = "create"; // can be "create", "edit", or "delete"
 
@@ -31,7 +31,7 @@ function resetForm() {
     habitNameBuffer = "";
     selectedDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
     duration = 7;
-    category = "Health";
+    category = "Intelligence";
     focusedFieldIndex = 0;
 }
 
@@ -85,13 +85,13 @@ function renderNaam() {
 
 function renderCategorie() {
     let f = focusedFieldIndex === 1 ? "focused" : "";
-    let opts = ["Health", "Activity", "Knowledge"];
+    let opts = STAT_CATEGORIES;
     let rows = opts.map((o, i) =>
-        `[${i + 1}] ${category === o ? "●" : "○"} ${o}`
+        `[${i + 1}] ${STAT_ICONS[o] || ""} ${category === o ? "●" : "○"} ${o}`
     ).join("\n");
     return `
 <div class="formRow ${f}">
-<div class="formRow-label">Categorie</div>
+<div class="formRow-label">Categorie (Stat)</div>
 ${rows}
 </div>`;
 }
@@ -170,7 +170,7 @@ function saveEdit() {
     habitNameBuffer = "";
     selectedDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
     duration = 7;
-    category = "Health";
+    category = "Intelligence";
 
     focusedFieldIndex = 1; // never jump into name typing field
     focusPanel = "form";
@@ -233,5 +233,6 @@ function renderHabitsUI() {
     renderForm();
     renderHabitList();
     renderCalendars();
+    renderStats();
     renderHotkeys();
 }

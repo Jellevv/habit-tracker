@@ -6,6 +6,7 @@ function renderLayout() {
     <div id="formPanel"></div>
     <div id="listPanel"></div>
     <div id="calendarPanel"></div>
+    <div id="statsPanel" class="box panel"></div>
     <div id="hotkeysPanel" class="box hotkeys"></div>
 </div>`;
 
@@ -28,7 +29,7 @@ function renderHotkeys() {
             `FORM${sep}` +
             `TAB→volgend veld${sep}` +
             `ENTER→opslaan${sep}` +
-            `Naam: typen (ESC om te bewerken)${sep}Cat:1-3${sep}Dagen:1-7${sep}Duur:0-4${sep}` +
+            `Naam: typen (ESC om te bewerken)${sep}Cat:1-4${sep}Dagen:1-7${sep}Duur:0-4${sep}` +
             common,
 
         list:

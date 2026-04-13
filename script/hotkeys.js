@@ -64,7 +64,7 @@ document.addEventListener("keydown", function (e) {
             habitNameBuffer = "";
             selectedDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
             duration = 7;
-            category = "Health";
+            category = "Intelligence";
 
             focusedFieldIndex = 1; // skip name field
             focusPanel = "form";
@@ -230,9 +230,10 @@ function handleFormInput(e, key) {
 
     /* CATEGORIE */
     if (focusedFieldIndex === 1) {
-        if (key === "1") category = "Health";
-        if (key === "2") category = "Activity";
-        if (key === "3") category = "Knowledge";
+        if (key === "1") category = "Intelligence";
+        if (key === "2") category = "Physical";
+        if (key === "3") category = "Charisma";
+        if (key === "4") category = "Spirit";
         renderHabitsUI();
     }
 
