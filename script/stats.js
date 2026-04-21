@@ -25,10 +25,33 @@ function getStatXP() {
     let xp = {};
     STAT_CATEGORIES.forEach(s => xp[s] = 0);
 
+    // Global booster check
+    let hasGlobal = purchasedCount["glo_b"] >= 1;
+
     habits.forEach(h => {
         if (!STAT_CATEGORIES.includes(h.category)) return;
         let done = Object.values(h.completions).filter(Boolean).length;
-        xp[h.category] += done * XP_PER_COMPLETION;
+        
+        let baseXP = done * XP_PER_COMPLETION;
+        
+        // Passive hook
+        let passiveNode = SKILLS_DATA[h.category] && SKILLS_DATA[h.category].passive;
+        if (passiveNode && purchasedCount[passiveNode.id]) {
+            baseXP += done * 2; // +2 per completion
+        }
+
+        xp[h.category] += baseXP;
+    });
+
+    // Active boosters hook
+    STAT_CATEGORIES.forEach(s => {
+        if (typeof activeChargesUsed !== 'undefined' && activeChargesUsed[s]) {
+             xp[s] += activeChargesUsed[s] * (XP_PER_COMPLETION * 1.0);
+        }
+        
+        if (hasGlobal) {
+             xp[s] = Math.floor(xp[s] * 1.15);
+        }
     });
 
     return xp;
@@ -71,6 +94,13 @@ function getOverallLevel(xpMap) {
 function renderStats() {
     let panel = document.getElementById("statsPanel");
     if (!panel) return;
+
+    panel.className = "box panel" + (focusPanel === "stats" ? " focused" : "");
+
+    if (showSkillsPanel) {
+        panel.innerHTML = renderSkillsUI();
+        return;
+    }
 
     let xpMap = getStatXP();
     let overallXP = 0;

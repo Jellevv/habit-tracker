@@ -378,3 +378,83 @@ body {
     text-align: left;
     flex: 1.5;
 }
+
+/* =====================
+   SKILLS PANEL
+===================== */
+.skill-sp-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed rgba(255,255,255,0.2);
+}
+.skill-trees-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 2px;
+}
+.skill-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+}
+.skill-cat-title {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    font-weight: bold;
+    width: 32px;
+    flex-shrink: 0;
+}
+.skill-node {
+    flex: 1;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+.skill-node.focused {
+    outline: 2px solid white;
+    outline-offset: 1px;
+}
+.skill-node.unlocked, .skill-node.active {
+    background: rgba(255,255,255,0.1);
+    border-width: 2px;
+}
+.skill-node.locked {
+    opacity: 0.5;
+    border-style: dashed;
+}
+.skill-path {
+    width: 12px;
+    height: 2px;
+    background-color: rgba(255,255,255,0.2);
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+.skill-path.unlocked {
+    background-color: white;
+}
+.sn-name {
+    font-weight: bold;
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+}
+.sn-cost {
+    font-size: 0.7rem;
+    color: #6adb6a;
+}
+.sn-desc {
+    font-size: 0.65rem;
+    opacity: 0.8;
+    line-height: 1.1;
+    margin-top: 4px;
+}
+.sn-charges {
+    font-size: 0.65rem;
+    color: #a78bfa;
+    margin-top: 2px;
+    font-weight: bold;
+}
