@@ -192,7 +192,26 @@ function toggleFocusedDay() {
     if (!habit.frequency.includes(getDayName(date))) return;
 
     let key = toKey(date);
-    habit.completions[key] = !habit.completions[key];
+    let isCurrentlyDone = habit.completions[key];
+    
+    // Toggle
+    habit.completions[key] = !isCurrentlyDone;
+    
+    // Handle Active Booster Charges
+    if (!isCurrentlyDone) {
+        // Checking off (toggling to true)
+        if (typeof activeChargesMemory !== 'undefined' && activeChargesMemory[habit.category] > 0) {
+            activeChargesMemory[habit.category]--;
+            activeChargesUsed[habit.category]++;
+        }
+    } else {
+        // Unchecking (toggling to false)
+        if (typeof activeChargesUsed !== 'undefined' && activeChargesUsed[habit.category] > 0) {
+            activeChargesUsed[habit.category]--;
+            activeChargesMemory[habit.category]++;
+        }
+    }
+
     renderHabitsUI();
 }
 

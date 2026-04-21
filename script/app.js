@@ -41,9 +41,23 @@ function renderHotkeys() {
 
         calendar:
             `KALENDER${sep}` +
-            `←→→dag navigeren${sep}` +
+            `←→ / h l→dag navigeren${sep}` +
+            `↑↓ / j k→week overslaan${sep}` +
             `SPATIE→afchecken${sep}` +
             common,
+            
+        stats:
+            typeof showSkillsPanel !== 'undefined' && showSkillsPanel ?
+            `SKILLS${sep}` +
+            `↑↓→navigeer categorie${sep}` +
+            `←→→kies active/passive${sep}` +
+            `ENTER→unlock${sep}` +
+            `S→terug naar stats${sep}` +
+            common
+            :
+            `STATS${sep}` +
+            `S→open skills panel${sep}` +
+            common
     };
 
     panel.innerText = legend[focusPanel] ?? "";

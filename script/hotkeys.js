@@ -27,7 +27,7 @@ document.addEventListener("keydown", function (e) {
         (key === "h" || key === "l") &&
         !(focusPanel === "form" && focusedFieldIndex === 0)
     ) {
-        let panels = ["form", "list", "calendar"];
+        let panels = ["form", "list", "calendar", "stats"];
         let idx = panels.indexOf(focusPanel);
 
         if (key === "h") idx--;
@@ -79,6 +79,47 @@ document.addEventListener("keydown", function (e) {
         focusedFieldIndex = 0; // typing field
         renderHabitsUI();
         return;
+    }
+
+    /* =====================
+       S — toggle skills panel
+    ===================== */
+    if (key === "s" && !(focusPanel === "form" && focusedFieldIndex === 0)) {
+        showSkillsPanel = !showSkillsPanel;
+        if (showSkillsPanel) focusPanel = "stats";
+        renderHabitsUI();
+        return;
+    }
+
+    /* =====================
+       SKILLS PANEL NAVIGATION
+    ===================== */
+    if (focusPanel === "stats" && showSkillsPanel) {
+        if (key === "arrowdown" || key === "j") {
+            focusedSkillCol = (focusedSkillCol + 1) % 5;
+            renderHabitsUI();
+            return;
+        }
+        if (key === "arrowup" || key === "k") {
+            focusedSkillCol = (focusedSkillCol + 4) % 5; // -1 equivalent
+            renderHabitsUI();
+            return;
+        }
+        if (key === "arrowright" || key === "arrowleft") {
+            // Only categories 0-3 have row 1. Global (4) has only row 0.
+            if (focusedSkillCol < 4) {
+                focusedSkillRow = (focusedSkillRow === 0) ? 1 : 0;
+            } else {
+                focusedSkillRow = 0;
+            }
+            renderHabitsUI();
+            return;
+        }
+        if (key === "enter" || key === " ") {
+            e.preventDefault();
+            attemptBuyFocusedSkill();
+            return;
+        }
     }
 
 
@@ -162,15 +203,39 @@ document.addEventListener("keydown", function (e) {
             if (idx < allowedDays.length - 1)
                 focusedDayIndex = allowedDays[idx + 1];
             renderHabitsUI();
+            return;
         }
 
         if (key === "arrowleft" || key === "h") {
-            // h is blocked above for panel-switch when in calendar
-            // (only reaches here if we're already in calendar)
             let idx = allowedDays.indexOf(focusedDayIndex);
             if (idx > 0)
                 focusedDayIndex = allowedDays[idx - 1];
             renderHabitsUI();
+            return;
+        }
+        
+        if (key === "arrowdown" || key === "j" || key === "]") {
+            let idx = allowedDays.indexOf(focusedDayIndex);
+            let jumpSpan = habit.frequency.length || 1; 
+            if (idx + jumpSpan < allowedDays.length) {
+                focusedDayIndex = allowedDays[idx + jumpSpan];
+            } else {
+                focusedDayIndex = allowedDays[allowedDays.length - 1];
+            }
+            renderHabitsUI();
+            return;
+        }
+
+        if (key === "arrowup" || key === "k" || key === "[") {
+            let idx = allowedDays.indexOf(focusedDayIndex);
+            let jumpSpan = habit.frequency.length || 1;
+            if (idx - jumpSpan >= 0) {
+                focusedDayIndex = allowedDays[idx - jumpSpan];
+            } else {
+                focusedDayIndex = allowedDays[0];
+            }
+            renderHabitsUI();
+            return;
         }
 
         if (key === " ") {
