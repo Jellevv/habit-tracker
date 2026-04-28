@@ -154,15 +154,24 @@ document.addEventListener("keydown", function (e) {
     if (focusPanel === "list") {
         if ((key === "j" || key === "arrowdown") &&
             selectedHabitIndex < habits.length - 1) {
+
             selectedHabitIndex++;
+
+            clampWeekToHabit();   // ⭐ FIX
+
             renderHabitsUI();
         }
 
         if ((key === "k" || key === "arrowup") &&
             selectedHabitIndex > 0) {
+
             selectedHabitIndex--;
+
+            clampWeekToHabit();   // ⭐ FIX
+
             renderHabitsUI();
         }
+
 
 
         if (key === "d" && habits.length > 0) {
@@ -207,7 +216,7 @@ document.addEventListener("keydown", function (e) {
 
         if (habit.frequencyMode === "flex") {
 
-            let times   = habit.timesPerWeek ?? 3;
+            let times = habit.timesPerWeek ?? 3;
             let maxWeeks = habit.duration === 9999
                 ? 52
                 : Math.ceil(habit.duration / 7);

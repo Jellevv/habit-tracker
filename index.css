@@ -287,7 +287,7 @@ body {
     cursor: default;
     user-select: none;
     aspect-ratio: 1;
-    max-width: 6rem;
+    max-width: 4.5rem;
 }
 
 /* Header row (day labels) */
@@ -300,6 +300,7 @@ body {
     height: 18px;
     padding: 0;
     margin-block: 1rem;
+    padding-left: 4rem;
 }
 
 .dayOutside {
@@ -620,3 +621,27 @@ body {
     margin-top: 2px;
     font-weight: bold;
 }
+
+.weekWrapper {
+    position: relative;
+    margin-left: 36px; 
+}
+
+.weekNumber {
+    position: absolute;
+    left: -36px;
+    top: 50%;
+    transform: translateY(-50%);
+
+
+    opacity: 0.5;
+}
+
+.weekNumberFocused {
+    opacity: 1;
+}
+
+.weekFocused {
+    background: rgb(49, 46, 46);
+}
+

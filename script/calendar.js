@@ -55,91 +55,117 @@ function renderFlexCalendar(habit, panel) {
             ? 52
             : Math.ceil(habit.duration / 7);
 
-
-
     let done =
         Object.values(habit.completions)
             .filter(Boolean).length;
+
+    /* META */
 
     let meta = document.createElement("div");
     meta.className = "calendarMeta";
 
     meta.innerText =
-        `${habit.name} · ${done} voltooid · week ${currentWeekIndex + 1} / ${weeks}`;
+        `${habit.name} · ${done} voltooid · week ${currentWeekIndex + 1}/${weeks}`;
 
     panel.appendChild(meta);
 
+    /* WINDOWED VIEW */
 
+    let half =
+        Math.floor(CALENDAR_WINDOW / 2);
 
-    let headerRow = document.createElement("div");
-    headerRow.className = "weekRow";
+    let startWeek =
+        Math.max(0, currentWeekIndex - half);
 
-    for (let s = 0; s < times; s++) {
-        let cell = document.createElement("div");
-        cell.className = "dayCell dayHeader";
-        cell.innerText = s + 1;
-        headerRow.appendChild(cell);
-    }
+    let endWeek =
+        Math.min(
+            weeks - 1,
+            startWeek + CALENDAR_WINDOW - 1
+        );
 
-    panel.appendChild(headerRow);
+    startWeek =
+        Math.max(
+            0,
+            endWeek - CALENDAR_WINDOW + 1
+        );
 
-
-
-    let half     = Math.floor(CALENDAR_WINDOW / 2);
-    let startWeek = Math.max(0, currentWeekIndex - half);
-    let endWeek   = Math.min(weeks - 1, startWeek + CALENDAR_WINDOW - 1);
-    startWeek     = Math.max(0, endWeek - CALENDAR_WINDOW + 1); // re-clamp
-
-
-
-    if (startWeek > 0) {
-        let hint = document.createElement("div");
-        hint.className = "scrollHint";
-        hint.innerText = `↑ ${startWeek} weken eerder`;
-        panel.appendChild(hint);
-    }
-
-
+    /* RENDER WEEKS */
 
     for (let w = startWeek; w <= endWeek; w++) {
+
+        let wrapper =
+            document.createElement("div");
+
+        wrapper.className =
+            "weekWrapper";
+
+        /* WEEK LABEL */
+
+        let label =
+            document.createElement("div");
+
+        label.className =
+            "weekNumber";
+
+        label.innerText =
+            `W${w + 1}`;
+
+        if (w === currentWeekIndex)
+            label.classList.add("weekNumberFocused");
+
+        wrapper.appendChild(label);
+
+        /* WEEK ROW */
 
         let weekRow =
             document.createElement("div");
 
-        weekRow.className = "weekRow";
+        weekRow.className =
+            "weekRow";
+
+        if (w === currentWeekIndex)
+            weekRow.classList.add("weekFocused");
 
         for (let s = 0; s < times; s++) {
 
-            let key  = `w${w}s${s}`;
-            let done = habit.completions[key];
+            let key =
+                `w${w}s${s}`;
 
-            let div = document.createElement("div");
-            div.className = "dayCell";
+            let done =
+                habit.completions[key];
+
+            let div =
+                document.createElement("div");
+
+            div.className =
+                "dayCell";
 
             if (done)
                 div.classList.add("dayDone");
 
-            if (w === currentWeekIndex && s === focusedDayIndex)
+            if (
+                w === currentWeekIndex &&
+                s === focusedDayIndex
+            )
                 div.classList.add("dayFocused");
-
-            div.dataset.week = w;
-            div.dataset.slot = s;
 
             weekRow.appendChild(div);
         }
 
-        panel.appendChild(weekRow);
-    }
+        wrapper.appendChild(weekRow);
 
-
-
-    if (endWeek < weeks - 1) {
-        let hint = document.createElement("div");
-        hint.className = "scrollHint";
-        hint.innerText = `↓ ${weeks - 1 - endWeek} weken later`;
-        panel.appendChild(hint);
+        panel.appendChild(wrapper);
     }
 }
+
+
+if (endWeek < weeks - 1) {
+    let hint = document.createElement("div");
+    hint.className = "scrollHint";
+    hint.innerText = `↓ ${weeks - 1 - endWeek} weken later`;
+    panel.appendChild(hint);
+}
+
 
 
 
@@ -236,6 +262,7 @@ function renderMiniFlex(habit, panel) {
 
 
 function renderFullHabitCalendar() {
+
     let panel =
         document.getElementById("calendarPanel");
 
@@ -244,102 +271,215 @@ function renderFullHabitCalendar() {
 
     if (!habit) return;
 
-
+    /* FLEX MODE */
 
     if (habit.frequencyMode === "flex") {
 
         renderFlexCalendar(habit, panel);
-
         return;
     }
 
-    let totalDays = habit.duration === 9999 ? 365 : habit.duration;
-    let startDate = new Date(habit.startDate);
-    let firstMonday = getMonday(startDate);
-    let offset = getMondayOffset(startDate);
-    let totalCells = totalDays + offset;
-    let totalWeeks = Math.ceil(totalCells / 7);
+    let totalDays =
+        habit.duration === 9999
+            ? 365
+            : habit.duration;
 
+    let startDate =
+        new Date(habit.startDate);
 
-    let focusedCell = focusedDayIndex + offset;
-    let focusedWeek = Math.floor(focusedCell / 7);
+    let firstMonday =
+        getMonday(startDate);
 
+    let offset =
+        getMondayOffset(startDate);
 
-    let half = Math.floor(CALENDAR_WINDOW / 2);
-    let startWeek = Math.max(0, focusedWeek - half);
-    let endWeek = Math.min(totalWeeks - 1, startWeek + CALENDAR_WINDOW - 1);
-    startWeek = Math.max(0, endWeek - CALENDAR_WINDOW + 1); // re-clamp
+    let totalCells =
+        totalDays + offset;
 
+    let totalWeeks =
+        Math.ceil(totalCells / 7);
 
-    let progress = getProgress(habit, totalDays, startDate);
-    let meta = document.createElement("div");
-    meta.className = "calendarMeta";
+    let focusedCell =
+        focusedDayIndex + offset;
+
+    let focusedWeek =
+        Math.floor(focusedCell / 7);
+
+    /* WINDOW */
+
+    let half =
+        Math.floor(CALENDAR_WINDOW / 2);
+
+    let startWeek =
+        Math.max(0, focusedWeek - half);
+
+    let endWeek =
+        Math.min(
+            totalWeeks - 1,
+            startWeek + CALENDAR_WINDOW - 1
+        );
+
+    startWeek =
+        Math.max(
+            0,
+            endWeek - CALENDAR_WINDOW + 1
+        );
+
+    /* META */
+
+    let progress =
+        getProgress(
+            habit,
+            totalDays,
+            startDate
+        );
+
+    let meta =
+        document.createElement("div");
+
+    meta.className =
+        "calendarMeta";
+
     meta.innerText =
-        `${habit.name}  ·  ${progress.done} dagen voltooid  ·  ` +
-        `${formatDate(startDate)}`;
+        `${habit.name} · ${progress.done} dagen voltooid · week ${focusedWeek + 1}/${totalWeeks}`;
+
     panel.appendChild(meta);
 
+    /* HEADER */
 
-    let headerRow = document.createElement("div");
-    headerRow.className = "weekRow";
-    NL_DAYS.forEach((nl) => {
-        let cell = document.createElement("div");
-        cell.className = "dayCell dayHeader";
+    let headerRow =
+        document.createElement("div");
+
+    headerRow.className =
+        "weekRow";
+
+    NL_DAYS.forEach(nl => {
+
+        let cell =
+            document.createElement("div");
+
+        cell.className =
+            "dayCell dayHeader";
+
         cell.innerText = nl;
+
         headerRow.appendChild(cell);
     });
+
     panel.appendChild(headerRow);
 
-
-    if (startWeek > 0) {
-        let hint = document.createElement("div");
-        hint.className = "scrollHint";
-        hint.innerText = `↑ ${startWeek} weken eerder`;
-        panel.appendChild(hint);
-    }
-
+    /* RENDER WEEKS */
 
     for (let w = startWeek; w <= endWeek; w++) {
-        let weekRow = document.createElement("div");
-        weekRow.className = "weekRow";
+
+        let wrapper =
+            document.createElement("div");
+
+        wrapper.className =
+            "weekWrapper";
+
+        /* WEEK LABEL */
+
+        let label =
+            document.createElement("div");
+
+        label.className =
+            "weekNumber";
+
+        label.innerText =
+            `W${w + 1}`;
+
+        if (w === focusedWeek)
+            label.classList.add("weekNumberFocused");
+
+        wrapper.appendChild(label);
+
+        /* WEEK ROW */
+
+        let weekRow =
+            document.createElement("div");
+
+        weekRow.className =
+            "weekRow";
+
+        if (w === focusedWeek)
+            weekRow.classList.add("weekFocused");
 
         for (let d = 0; d < 7; d++) {
-            let cellIndex = w * 7 + d;
-            let date = new Date(firstMonday);
-            date.setDate(firstMonday.getDate() + cellIndex);
 
-            let dayName = getDayName(date);
-            let key = toKey(date);
-            let done = habit.completions[key];
-            let isAllowed = habit.frequency.includes(dayName);
-            let diffDays = Math.floor(
-                (date - startDate) / (1000 * 60 * 60 * 24)
+            let cellIndex =
+                w * 7 + d;
+
+            let date =
+                new Date(firstMonday);
+
+            date.setDate(
+                firstMonday.getDate() +
+                cellIndex
             );
 
-            let div = document.createElement("div");
-            div.className = "dayCell";
-            div.innerText = date.getDate();
+            let dayName =
+                getDayName(date);
 
-            if (diffDays < 0 || diffDays >= totalDays) {
-                div.classList.add("dayOutside");
+            let key =
+                toKey(date);
+
+            let done =
+                habit.completions[key];
+
+            let isAllowed =
+                habit.frequency.includes(dayName);
+
+            let diffDays =
+                Math.floor(
+                    (date - startDate) /
+                    (1000 * 60 * 60 * 24)
+                );
+
+            let div =
+                document.createElement("div");
+
+            div.className =
+                "dayCell";
+
+            div.innerText =
+                date.getDate();
+
+            if (
+                diffDays < 0 ||
+                diffDays >= totalDays
+            ) {
+
+                div.classList.add(
+                    "dayOutside"
+                );
+
             } else {
-                if (!isAllowed) div.classList.add("dayDisabled");
-                if (done) div.classList.add("dayDone");
-                if (diffDays === focusedDayIndex) div.classList.add("dayFocused");
+
+                if (!isAllowed)
+                    div.classList.add(
+                        "dayDisabled"
+                    );
+
+                if (done)
+                    div.classList.add(
+                        "dayDone"
+                    );
+
+                if (
+                    diffDays === focusedDayIndex
+                )
+                    div.classList.add(
+                        "dayFocused"
+                    );
             }
 
             weekRow.appendChild(div);
         }
 
-        panel.appendChild(weekRow);
-    }
+        wrapper.appendChild(weekRow);
 
-
-    if (endWeek < totalWeeks - 1) {
-        let hint = document.createElement("div");
-        hint.className = "scrollHint";
-        hint.innerText = `↓ ${totalWeeks - 1 - endWeek} weken later`;
-        panel.appendChild(hint);
+        panel.appendChild(wrapper);
     }
 }
 
@@ -503,3 +643,45 @@ function getDayName(date) {
     let names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     return names[date.getDay()];
 }
+
+function clampWeekToHabit() {
+
+    if (habits.length === 0) {
+        currentWeekIndex = 0;
+        focusedDayIndex = 0;
+        return;
+    }
+
+    let habit =
+        habits[selectedHabitIndex];
+
+    if (!habit) return;
+
+    let maxWeeks;
+
+    if (habit.frequencyMode === "flex") {
+
+        maxWeeks =
+            habit.duration === 9999
+                ? 52
+                : Math.ceil(habit.duration / 7);
+
+    }
+
+    else {
+
+        maxWeeks =
+            getMaxWeeks(habit);
+
+    }
+
+    if (maxWeeks !== Infinity &&
+        currentWeekIndex >= maxWeeks) {
+
+        // ⭐ RESET instead of clamp
+        currentWeekIndex = 0;
+        focusedDayIndex = 0;
+    }
+}
+
+
