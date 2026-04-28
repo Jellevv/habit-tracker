@@ -2,89 +2,14 @@ document.addEventListener("keydown", function (e) {
     let key = e.key.toLowerCase();
 
     /* =====================
-       TAB — cycle panels
-    ===================== */
-
-    if (key === "tab") {
-        e.preventDefault();
-
-        if (focusPanel === "form") {
-            // Cycle fields (skip name field)
-            focusedFieldIndex++;
-            if (focusedFieldIndex > 3) focusedFieldIndex = 1; // loop category → duration
-            renderHabitsUI();
-        }
-        return;
-    }
-
-
-    /* =====================
-       H / L — panel switch (vim-style)
-       Blocked when typing in name field
+       S — toggle skills panel
+       Blocked only when typing a habit name (insert mode, step 0)
     ===================== */
 
     if (
-        (key === "h" || key === "l") &&
-        !(focusPanel === "form" && focusedFieldIndex === 0)
+        key === "s" &&
+        !(focusPanel === "form" && formMode === "insert" && promptStep === 0)
     ) {
-        let panels = ["form", "list", "calendar", "stats"];
-        let idx = panels.indexOf(focusPanel);
-
-        if (key === "h") idx--;
-        if (key === "l") idx++;
-
-        if (idx < 0) idx = panels.length - 1;
-        if (idx >= panels.length) idx = 0;
-
-        focusPanel = panels[idx];
-
-        if (focusPanel === "form") {
-            /* Skip to category so we don't land in the typing field */
-            focusedFieldIndex = 1;
-        }
-
-        if (focusPanel === "calendar") {
-            jumpToFirstOpenDay();
-        }
-
-        renderHabitsUI();
-        return;
-    }
-
-    /* =====================
-       ESCAPE — back to form
-    ===================== */
-
-    if (key === "escape") {
-        if (modus === "edit" || modus === "delete") {
-            // Cancel edit/delete
-            modus = "create";
-            editHabitIndex = null;
-
-            habitNameBuffer = "";
-            selectedDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-            duration = 7;
-            category = "Intelligence";
-
-            focusedFieldIndex = 1; // skip name field
-            focusPanel = "form";
-            renderHabitsUI();
-            return;
-        }
-
-        // Default ESC behavior — go to name field
-        modus = "create";
-        editHabitIndex = null;
-        focusPanel = "form";
-        focusedFieldIndex = 0; // typing field
-        renderHabitsUI();
-        return;
-    }
-
-    /* =====================
-       S — toggle skills panel
-    ===================== */
-    if (key === "s" && !(focusPanel === "form" && focusedFieldIndex === 0)) {
         showSkillsPanel = !showSkillsPanel;
         if (showSkillsPanel) focusPanel = "stats";
         renderHabitsUI();
@@ -93,28 +18,34 @@ document.addEventListener("keydown", function (e) {
 
     /* =====================
        SKILLS PANEL NAVIGATION
+       (when stats panel is focused and skills tree is open)
     ===================== */
+
     if (focusPanel === "stats" && showSkillsPanel) {
+
         if (key === "arrowdown" || key === "j") {
             focusedSkillCol = (focusedSkillCol + 1) % 5;
             renderHabitsUI();
             return;
         }
+
         if (key === "arrowup" || key === "k") {
-            focusedSkillCol = (focusedSkillCol + 4) % 5; // -1 equivalent
+            focusedSkillCol = (focusedSkillCol + 4) % 5; // -1 mod 5
             renderHabitsUI();
             return;
         }
+
         if (key === "arrowright" || key === "arrowleft") {
-            // Only categories 0-3 have row 1. Global (4) has only row 0.
+            // Only stat categories (0-3) have an active node; Global (4) is passive only
             if (focusedSkillCol < 4) {
-                focusedSkillRow = (focusedSkillRow === 0) ? 1 : 0;
+                focusedSkillRow = focusedSkillRow === 0 ? 1 : 0;
             } else {
                 focusedSkillRow = 0;
             }
             renderHabitsUI();
             return;
         }
+
         if (key === "enter" || key === " ") {
             e.preventDefault();
             attemptBuyFocusedSkill();
@@ -122,14 +53,93 @@ document.addEventListener("keydown", function (e) {
         }
     }
 
+    /* =====================
+       H / L — panel switch (vim-style)
+       Blocked when typing in insert mode at name step
+    ===================== */
+
+    if (
+        (key === "h" || key === "l") &&
+        !(focusPanel === "form" && formMode === "insert" && promptStep === 0)
+    ) {
+        // In insert mode on non-name steps, h/l should not switch panels
+        if (focusPanel === "form" && formMode === "insert") {
+            // fall through to form handler below
+        } else {
+            let panels = ["form", "list", "calendar", "stats"];
+            let idx = panels.indexOf(focusPanel);
+
+            if (key === "h") idx--;
+            if (key === "l") idx++;
+
+            if (idx < 0) idx = panels.length - 1;
+            if (idx >= panels.length) idx = 0;
+
+            focusPanel = panels[idx];
+
+            if (focusPanel === "calendar") {
+                jumpToFirstOpenDay();
+            }
+
+            renderHabitsUI();
+            return;
+        }
+    }
+
+    /* =====================
+       ESCAPE — back / cancel
+    ===================== */
+
+    if (key === "escape") {
+        // Close skills panel if open
+        if (showSkillsPanel) {
+            showSkillsPanel = false;
+            renderHabitsUI();
+            return;
+        }
+
+        // If in insert mode, step back or cancel
+        if (focusPanel === "form" && formMode === "insert") {
+            if (promptStep > 0) {
+                promptStep--;
+                renderHabitsUI();
+                return;
+            }
+            // At step 0 — cancel entirely
+            modus = "create";
+            editHabitIndex = null;
+            resetForm();
+            focusPanel = "form";
+            renderHabitsUI();
+            return;
+        }
+
+        // Default — focus form, normal mode
+        focusPanel = "form";
+        formMode = "normal";
+        promptStep = 0;
+        renderHabitsUI();
+        return;
+    }
 
 
     /* =====================
-       FORM
+       FORM panel
     ===================== */
 
     if (focusPanel === "form") {
-        handleFormInput(e, key);
+        // Normal mode — press i to enter insert mode
+        if (formMode === "normal") {
+            if (key === "i") {
+                formMode = "insert";
+                promptStep = 0;
+                renderHabitsUI();
+            }
+            return;
+        }
+
+        // Insert mode — delegate to prompt handler
+        handlePromptInput(e, key);
         return;
     }
 
@@ -150,11 +160,12 @@ document.addEventListener("keydown", function (e) {
             renderHabitsUI();
         }
 
-        /* D — delete selected habit */
+        // D — delete selected habit
         if (key === "d" && habits.length > 0) {
             modus = "delete";
             editHabitIndex = selectedHabitIndex;
-            focusPanel = "form"; // switch to form panel to confirm
+            focusPanel = "form";
+            formMode = "insert"; // enter insert mode for delete confirmation
             renderHabitsUI();
             return;
         }
@@ -168,11 +179,15 @@ document.addEventListener("keydown", function (e) {
             let h = habits[editHabitIndex];
             habitNameBuffer = h.name;
             category = h.category;
-            selectedDays = [...h.frequency];
+            dayMode = h.frequencyMode || "fixed";
+            selectedDays = [...(h.frequency || [])];
+            timesPerWeek = h.timesPerWeek || 3;
+            timesPerWeekCursor = Math.max(0, timesPerWeek - 1);
             duration = h.duration;
 
             focusPanel = "form";
-            focusedFieldIndex = 1; // skip name field unless ESC pressed
+            formMode = "insert";
+            promptStep = 0; // start from name
             renderHabitsUI();
             return;
         }
@@ -186,10 +201,65 @@ document.addEventListener("keydown", function (e) {
         let habit = habits[selectedHabitIndex];
         if (!habit) return;
 
-        let totalDays = habit.duration === 9999 ? 365 : habit.duration;
-        let startDate = new Date(habit.startDate);
+        /* FLEX MODE NAVIGATION */
 
-        /* Build list of allowed day indices */
+        if (habit.frequencyMode === "flex") {
+
+            let times   = habit.timesPerWeek ?? 3;
+            let maxWeeks = habit.duration === 9999
+                ? 52
+                : Math.ceil(habit.duration / 7);
+
+            if (key === "arrowright" || key === "l") {
+                if (focusedDayIndex < times - 1)
+                    focusedDayIndex++;
+                renderHabitsUI();
+                return;
+            }
+
+            if (key === "arrowleft" || key === "h") {
+                if (focusedDayIndex > 0)
+                    focusedDayIndex--;
+                renderHabitsUI();
+                return;
+            }
+
+            if (key === "arrowdown" || key === "j") {
+                if (currentWeekIndex < maxWeeks - 1) {
+                    currentWeekIndex++;
+                    focusedDayIndex = Math.min(focusedDayIndex, times - 1);
+                }
+                renderHabitsUI();
+                return;
+            }
+
+            if (key === "arrowup" || key === "k") {
+                if (currentWeekIndex > 0) {
+                    currentWeekIndex--;
+                    focusedDayIndex = Math.min(focusedDayIndex, times - 1);
+                }
+                renderHabitsUI();
+                return;
+            }
+
+            if (key === " ") {
+                e.preventDefault();
+                toggleFocusedDay();
+                return;
+            }
+
+            return;
+        }
+
+        /* FIXED MODE */
+
+        let totalDays =
+            habit.duration === 9999 ? 365 : habit.duration;
+
+        let startDate =
+            new Date(habit.startDate);
+
+        // Build list of allowed day indices
         let allowedDays = [];
         for (let i = 0; i < totalDays; i++) {
             let d = new Date(startDate);
@@ -213,10 +283,10 @@ document.addEventListener("keydown", function (e) {
             renderHabitsUI();
             return;
         }
-        
+
         if (key === "arrowdown" || key === "j" || key === "]") {
             let idx = allowedDays.indexOf(focusedDayIndex);
-            let jumpSpan = habit.frequency.length || 1; 
+            let jumpSpan = habit.frequency.length || 1;
             if (idx + jumpSpan < allowedDays.length) {
                 focusedDayIndex = allowedDays[idx + jumpSpan];
             } else {
@@ -274,18 +344,35 @@ function jumpToFirstOpenDay() {
 }
 
 /* =====================
-   FORM INPUT HANDLING
+   PROMPT INPUT HANDLING
 ===================== */
 
-function handleFormInput(e, key) {
+function handlePromptInput(e, key) {
 
-    /* NAAM */
-    if (focusedFieldIndex === 0) {
+    /* DELETE MODE — only enter/esc */
+    if (modus === "delete") {
+        if (key === "enter") {
+            deleteHabit();
+        }
+        return;
+    }
+
+    /* STEP 0: NAME — free typing */
+    if (promptStep === 0) {
+        if (key === "enter") {
+            if (habitNameBuffer.trim()) {
+                promptStep = 1;
+                renderHabitsUI();
+            }
+            return;
+        }
+
         if (key === "backspace") {
             habitNameBuffer = habitNameBuffer.slice(0, -1);
             renderHabitsUI();
             return;
         }
+
         if (key.length === 1) {
             habitNameBuffer += e.key;
             renderHabitsUI();
@@ -293,48 +380,149 @@ function handleFormInput(e, key) {
         }
     }
 
-    /* CATEGORIE */
-    if (focusedFieldIndex === 1) {
-        if (key === "1") category = "Intelligence";
-        if (key === "2") category = "Physical";
-        if (key === "3") category = "Charisma";
-        if (key === "4") category = "Spirit";
-        renderHabitsUI();
-    }
+    /* STEP 1: CATEGORY */
+    if (promptStep === 1) {
 
-    /* DAGEN */
-    if (focusedFieldIndex === 2) {
-        let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        let i = parseInt(key) - 1;
+        let max = STAT_CATEGORIES.length - 1;
 
-        if (i >= 0 && i < 7) {
-            let d = days[i];
-            if (selectedDays.includes(d))
-                selectedDays = selectedDays.filter(x => x !== d);
-            else
-                selectedDays.push(d);
+        if (key === "j") {
+            categoryCursor = Math.min(max, categoryCursor + 1);
             renderHabitsUI();
+            return;
+        }
+
+        if (key === "k") {
+            categoryCursor = Math.max(0, categoryCursor - 1);
+            renderHabitsUI();
+            return;
+        }
+
+        if (key === " ") {
+            category = STAT_CATEGORIES[categoryCursor];
+            renderHabitsUI();
+            return;
+        }
+
+        if (key === "enter") {
+            promptStep = 2;
+            renderHabitsUI();
+            return;
         }
     }
 
-    /* DUUR */
-    if (focusedFieldIndex === 3) {
-        if (key === "1") duration = 7;
-        if (key === "2") duration = 14;
-        if (key === "3") duration = 35;
-        if (key === "4") duration = 30;
-        if (key === "0") duration = 9999;
-        renderHabitsUI();
+
+    /* STEP 2: DAYS OR TIMES */
+    if (promptStep === 2) {
+
+        let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+        /* TAB → switch fixed/flex mode */
+        if (key === "tab") {
+            e.preventDefault();
+            dayMode = dayMode === "fixed" ? "flex" : "fixed";
+            renderHabitsUI();
+            return;
+        }
+
+        /* FIXED DAYS MODE */
+
+        if (dayMode === "fixed") {
+
+            if (key === "j") {
+                dayCursor = Math.min(6, dayCursor + 1);
+                renderHabitsUI();
+                return;
+            }
+
+            if (key === "k") {
+                dayCursor = Math.max(0, dayCursor - 1);
+                renderHabitsUI();
+                return;
+            }
+
+            if (key === " ") {
+                let d = days[dayCursor];
+                if (selectedDays.includes(d))
+                    selectedDays = selectedDays.filter(x => x !== d);
+                else
+                    selectedDays.push(d);
+                renderHabitsUI();
+                return;
+            }
+        }
+
+        /* FLEX MODE */
+
+        if (dayMode === "flex") {
+
+            if (key === "j") {
+                timesPerWeekCursor = Math.min(6, timesPerWeekCursor + 1);
+                renderHabitsUI();
+                return;
+            }
+
+            if (key === "k") {
+                timesPerWeekCursor = Math.max(0, timesPerWeekCursor - 1);
+                renderHabitsUI();
+                return;
+            }
+
+            if (key === " ") {
+                timesPerWeek = timesPerWeekCursor + 1;
+                renderHabitsUI();
+                return;
+            }
+        }
+
+        /* ENTER → next step */
+        if (key === "enter") {
+            promptStep = 3;
+            renderHabitsUI();
+            return;
+        }
     }
 
-    /* ENTER — save */
-    if (key === "enter") {
-        if (modus === "create") {
-            saveHabit();
-        } else if (modus === "edit") {
-            saveEdit();
-        } else if (modus === "delete") {
-            deleteHabit();
+
+    /* STEP 3: DURATION */
+    if (promptStep === 3) {
+
+        let opts = [7, 14, 35, 30, 9999];
+
+        if (key === "j") {
+            durationCursor = Math.min(4, durationCursor + 1);
+            renderHabitsUI();
+            return;
         }
+
+        if (key === "k") {
+            durationCursor = Math.max(0, durationCursor - 1);
+            renderHabitsUI();
+            return;
+        }
+
+        if (key === " ") {
+            duration = opts[durationCursor];
+            renderHabitsUI();
+            return;
+        }
+
+        if (key === "enter") {
+            promptStep = 4;
+            renderHabitsUI();
+            return;
+        }
+    }
+
+
+    /* STEP 4: CONFIRM — enter to save */
+    if (promptStep === 4) {
+        if (key === "enter") {
+            if (modus === "create") {
+                saveHabit();
+            } else if (modus === "edit") {
+                saveEdit();
+            }
+        }
+        return;
     }
 }

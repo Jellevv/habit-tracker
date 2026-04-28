@@ -1,5 +1,5 @@
 let currentWeekIndex = 0;
-let focusedDayIndex  = 0;
+let focusedDayIndex = 0;
 
 /* Number of weeks visible in the full calendar view */
 const CALENDAR_WINDOW = 5;
@@ -12,24 +12,139 @@ const NL_DAYS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 ===================== */
 
 function renderCalendars() {
-    let panel = document.getElementById("calendarPanel");
+
+    let panel =
+        document.getElementById("calendarPanel");
 
     panel.className =
-        "box panel" + (focusPanel === "calendar" ? " focused" : "");
+        "box panel" +
+        (focusPanel === "calendar"
+            ? " focused"
+            : "");
+
+    /* Clear panel */
 
     panel.innerHTML =
         `<span class="panel-title">Kalender</span>`;
 
     if (habits.length === 0) {
+
         panel.innerHTML +=
-            `<div style="opacity:0.6;font-size:11px;">Selecteer of maak een habit.</div>`;
+            `<div style="opacity:0.6;font-size:11px;">
+            Selecteer of maak een habit.
+            </div>`;
+
         return;
     }
 
-    if (focusPanel === "calendar") {
-        renderFullHabitCalendar();
-    } else {
-        habits.forEach((h) => renderMiniWeek(h));
+    /* MINI VIEW → show ALL habits */
+
+    if (focusPanel !== "calendar") {
+
+        habits.forEach(h =>
+            renderMiniWeek(h));
+
+        return;
+    }
+
+    /* FULL VIEW → show SELECTED habit */
+
+    renderFullHabitCalendar();
+}
+
+function renderFlexCalendar(habit, panel) {
+
+    let times =
+        habit.timesPerWeek ?? 3;
+
+    let weeks =
+        habit.duration === 9999
+            ? 52
+            : Math.ceil(habit.duration / 7);
+
+    /* Progress */
+
+    let done =
+        Object.values(habit.completions)
+            .filter(Boolean).length;
+
+    let meta = document.createElement("div");
+    meta.className = "calendarMeta";
+
+    meta.innerText =
+        `${habit.name} · ${done} voltooid · week ${currentWeekIndex + 1} / ${weeks}`;
+
+    panel.appendChild(meta);
+
+    /* Slot header row (1 … times) */
+
+    let headerRow = document.createElement("div");
+    headerRow.className = "weekRow";
+
+    for (let s = 0; s < times; s++) {
+        let cell = document.createElement("div");
+        cell.className = "dayCell dayHeader";
+        cell.innerText = s + 1;
+        headerRow.appendChild(cell);
+    }
+
+    panel.appendChild(headerRow);
+
+    /* Windowed rendering — mirror the fixed-calendar CALENDAR_WINDOW logic */
+
+    let half     = Math.floor(CALENDAR_WINDOW / 2);
+    let startWeek = Math.max(0, currentWeekIndex - half);
+    let endWeek   = Math.min(weeks - 1, startWeek + CALENDAR_WINDOW - 1);
+    startWeek     = Math.max(0, endWeek - CALENDAR_WINDOW + 1); // re-clamp
+
+    /* "More above" hint */
+
+    if (startWeek > 0) {
+        let hint = document.createElement("div");
+        hint.className = "scrollHint";
+        hint.innerText = `↑ ${startWeek} weken eerder`;
+        panel.appendChild(hint);
+    }
+
+    /* Render visible weeks */
+
+    for (let w = startWeek; w <= endWeek; w++) {
+
+        let weekRow =
+            document.createElement("div");
+
+        weekRow.className = "weekRow";
+
+        for (let s = 0; s < times; s++) {
+
+            let key  = `w${w}s${s}`;
+            let done = habit.completions[key];
+
+            let div = document.createElement("div");
+            div.className = "dayCell";
+
+            if (done)
+                div.classList.add("dayDone");
+
+            if (w === currentWeekIndex && s === focusedDayIndex)
+                div.classList.add("dayFocused");
+
+            div.dataset.week = w;
+            div.dataset.slot = s;
+
+            weekRow.appendChild(div);
+        }
+
+        panel.appendChild(weekRow);
+    }
+
+    /* "More below" hint */
+
+    if (endWeek < weeks - 1) {
+        let hint = document.createElement("div");
+        hint.className = "scrollHint";
+        hint.innerText = `↓ ${weeks - 1 - endWeek} weken later`;
+        panel.appendChild(hint);
     }
 }
 
@@ -39,6 +154,13 @@ function renderCalendars() {
 
 function renderMiniWeek(habit) {
     let panel = document.getElementById("calendarPanel");
+
+    if (habit.frequencyMode === "flex") {
+
+        renderMiniFlex(habit, panel);
+
+        return;
+    }
 
     let weekDates = getWeekDates(habit.startDate, currentWeekIndex);
 
@@ -55,18 +177,18 @@ function renderMiniWeek(habit) {
     row.className = "weekRow";
 
     weekDates.forEach((date) => {
-        let dayName   = getDayName(date);
-        let key       = toKey(date);
-        let done      = habit.completions[key];
+        let dayName = getDayName(date);
+        let key = toKey(date);
+        let done = habit.completions[key];
         let isAllowed = habit.frequency.includes(dayName);
 
         let div = document.createElement("div");
         div.className = "dayCell";
         if (!isAllowed) div.classList.add("dayDisabled");
-        if (done)       div.classList.add("dayDone");
+        if (done) div.classList.add("dayDone");
 
-        let nlIdx = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(dayName);
-        let nlMap = ["Zo","Ma","Di","Wo","Do","Vr","Za"];
+        let nlIdx = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(dayName);
+        let nlMap = ["Zo", "Ma", "Di", "Wo", "Do", "Vr", "Za"];
 
         div.innerHTML =
             `<span class="miniDay">${nlMap[nlIdx]}</span>${date.getDate()}`;
@@ -77,20 +199,75 @@ function renderMiniWeek(habit) {
     panel.appendChild(wrapper);
 }
 
+function renderMiniFlex(habit, panel) {
+
+    let wrapper = document.createElement("div");
+    wrapper.className = "miniHabit";
+
+    let title = document.createElement("div");
+    title.className = "miniHabit-name";
+
+    title.innerHTML =
+        `${habit.name}<span class="miniHabit-cat">${habit.category}</span>`;
+
+    wrapper.appendChild(title);
+
+    let row = document.createElement("div");
+    row.className = "weekRow";
+
+    let times =
+        habit.timesPerWeek ?? 3;
+
+    for (let i = 0; i < times; i++) {
+
+        let key =
+            `w${currentWeekIndex}s${i}`;
+
+        let done =
+            habit.completions[key];
+
+        let div =
+            document.createElement("div");
+
+        div.className = "dayCell";
+
+        if (done)
+            div.classList.add("dayDone");
+
+        row.appendChild(div);
+    }
+
+    wrapper.appendChild(row);
+    panel.appendChild(wrapper);
+}
+
+
 /* =====================
    FULL CALENDAR — windowed
 ===================== */
 
 function renderFullHabitCalendar() {
-    let panel = document.getElementById("calendarPanel");
+    let panel =
+        document.getElementById("calendarPanel");
 
-    let habit = habits[selectedHabitIndex];
+    let habit =
+        habits[selectedHabitIndex];
+
     if (!habit) return;
 
-    let totalDays  = habit.duration === 9999 ? 365 : habit.duration;
-    let startDate  = new Date(habit.startDate);
+    /* FLEX MODE */
+
+    if (habit.frequencyMode === "flex") {
+
+        renderFlexCalendar(habit, panel);
+
+        return;
+    }
+
+    let totalDays = habit.duration === 9999 ? 365 : habit.duration;
+    let startDate = new Date(habit.startDate);
     let firstMonday = getMonday(startDate);
-    let offset     = getMondayOffset(startDate);
+    let offset = getMondayOffset(startDate);
     let totalCells = totalDays + offset;
     let totalWeeks = Math.ceil(totalCells / 7);
 
@@ -99,10 +276,10 @@ function renderFullHabitCalendar() {
     let focusedWeek = Math.floor(focusedCell / 7);
 
     /* Window: center on focused week */
-    let half      = Math.floor(CALENDAR_WINDOW / 2);
+    let half = Math.floor(CALENDAR_WINDOW / 2);
     let startWeek = Math.max(0, focusedWeek - half);
-    let endWeek   = Math.min(totalWeeks - 1, startWeek + CALENDAR_WINDOW - 1);
-    startWeek     = Math.max(0, endWeek - CALENDAR_WINDOW + 1); // re-clamp
+    let endWeek = Math.min(totalWeeks - 1, startWeek + CALENDAR_WINDOW - 1);
+    startWeek = Math.max(0, endWeek - CALENDAR_WINDOW + 1); // re-clamp
 
     /* Progress */
     let progress = getProgress(habit, totalDays, startDate);
@@ -142,11 +319,11 @@ function renderFullHabitCalendar() {
             let date = new Date(firstMonday);
             date.setDate(firstMonday.getDate() + cellIndex);
 
-            let dayName   = getDayName(date);
-            let key       = toKey(date);
-            let done      = habit.completions[key];
+            let dayName = getDayName(date);
+            let key = toKey(date);
+            let done = habit.completions[key];
             let isAllowed = habit.frequency.includes(dayName);
-            let diffDays  = Math.floor(
+            let diffDays = Math.floor(
                 (date - startDate) / (1000 * 60 * 60 * 24)
             );
 
@@ -157,8 +334,8 @@ function renderFullHabitCalendar() {
             if (diffDays < 0 || diffDays >= totalDays) {
                 div.classList.add("dayOutside");
             } else {
-                if (!isAllowed)              div.classList.add("dayDisabled");
-                if (done)                    div.classList.add("dayDone");
+                if (!isAllowed) div.classList.add("dayDisabled");
+                if (done) div.classList.add("dayDone");
                 if (diffDays === focusedDayIndex) div.classList.add("dayFocused");
             }
 
@@ -182,31 +359,74 @@ function renderFullHabitCalendar() {
 ===================== */
 
 function toggleFocusedDay() {
+
     if (habits.length === 0) return;
 
-    let habit     = habits[selectedHabitIndex];
-    let startDate = new Date(habit.startDate);
-    let date      = new Date(startDate);
-    date.setDate(startDate.getDate() + focusedDayIndex);
+    let habit =
+        habits[selectedHabitIndex];
 
-    if (!habit.frequency.includes(getDayName(date))) return;
+    /* FLEX MODE */
+
+    if (habit.frequencyMode === "flex") {
+
+        let key =
+            `w${currentWeekIndex}s${focusedDayIndex}`;
+
+        let isCurrentlyDone = !!habit.completions[key];
+        habit.completions[key] = !isCurrentlyDone;
+
+        // Handle active booster charges for flex completions
+        if (!isCurrentlyDone) {
+            if (typeof activeChargesMemory !== 'undefined' &&
+                activeChargesMemory[habit.category] > 0) {
+                activeChargesMemory[habit.category]--;
+                activeChargesUsed[habit.category]++;
+            }
+        } else {
+            if (typeof activeChargesUsed !== 'undefined' &&
+                activeChargesUsed[habit.category] > 0) {
+                activeChargesUsed[habit.category]--;
+                activeChargesMemory[habit.category]++;
+            }
+        }
+
+        renderHabitsUI();
+        return;
+    }
+
+    /* FIXED MODE */
+
+    let startDate =
+        new Date(habit.startDate);
+
+    let date =
+        new Date(startDate);
+
+    date.setDate(
+        startDate.getDate() + focusedDayIndex
+    );
+
+    if (
+        !habit.frequency.includes(
+            getDayName(date)
+        )
+    ) return;
 
     let key = toKey(date);
     let isCurrentlyDone = habit.completions[key];
-    
-    // Toggle
+
     habit.completions[key] = !isCurrentlyDone;
-    
-    // Handle Active Booster Charges
+
+    // Handle active booster charges
     if (!isCurrentlyDone) {
-        // Checking off (toggling to true)
-        if (typeof activeChargesMemory !== 'undefined' && activeChargesMemory[habit.category] > 0) {
+        if (typeof activeChargesMemory !== 'undefined' &&
+            activeChargesMemory[habit.category] > 0) {
             activeChargesMemory[habit.category]--;
             activeChargesUsed[habit.category]++;
         }
     } else {
-        // Unchecking (toggling to false)
-        if (typeof activeChargesUsed !== 'undefined' && activeChargesUsed[habit.category] > 0) {
+        if (typeof activeChargesUsed !== 'undefined' &&
+            activeChargesUsed[habit.category] > 0) {
             activeChargesUsed[habit.category]--;
             activeChargesMemory[habit.category]++;
         }
@@ -215,6 +435,8 @@ function toggleFocusedDay() {
     renderHabitsUI();
 }
 
+
+
 /* =====================
    WEEK NAVIGATION (mini view)
 ===================== */
@@ -222,16 +444,16 @@ function toggleFocusedDay() {
 function moveWeek(direction) {
     if (habits.length === 0) return;
 
-    let habit    = habits[selectedHabitIndex];
+    let habit = habits[selectedHabitIndex];
     let maxWeeks = getMaxWeeks(habit);
-    let newWeek  = currentWeekIndex + direction;
+    let newWeek = currentWeekIndex + direction;
 
     if (newWeek < 0) newWeek = 0;
     if (maxWeeks !== Infinity && newWeek >= maxWeeks)
         newWeek = maxWeeks - 1;
 
     currentWeekIndex = newWeek;
-    focusedDayIndex  = 0;
+    focusedDayIndex = 0;
     renderHabitsUI();
 }
 
@@ -240,9 +462,9 @@ function moveWeek(direction) {
 ===================== */
 
 function getProgress(habit, totalDays, startDate) {
-    let done     = Object.values(habit.completions).filter(Boolean).length;
+    let done = Object.values(habit.completions).filter(Boolean).length;
     let possible = 0;
-    let today    = new Date();
+    let today = new Date();
     for (let i = 0; i < totalDays; i++) {
         let d = new Date(startDate);
         d.setDate(startDate.getDate() + i);
@@ -254,9 +476,9 @@ function getProgress(habit, totalDays, startDate) {
 
 function formatDate(date) {
     return date.toLocaleDateString("nl-BE", {
-        day:   "2-digit",
+        day: "2-digit",
         month: "short",
-        year:  "numeric"
+        year: "numeric"
     });
 }
 
@@ -265,7 +487,7 @@ function toKey(date) {
 }
 
 function getMonday(date) {
-    let d   = new Date(date);
+    let d = new Date(date);
     let day = d.getDay();
     let diff = day === 0 ? -6 : 1 - day;
     d.setDate(d.getDate() + diff);

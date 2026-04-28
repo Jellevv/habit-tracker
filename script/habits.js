@@ -4,7 +4,9 @@ let selectedHabitIndex = 0;
 
 let focusPanel = "form";
 
-let focusedFieldIndex = 1;
+let formMode = "normal"; // "normal" or "insert"
+
+let promptStep = 0; // 0=name, 1=category, 2=days, 3=duration, 4=confirm
 
 let formFields =
     ["naam", "categorie", "dagen", "duur"];
@@ -22,138 +24,522 @@ let modus = "create"; // can be "create", "edit", or "delete"
 
 let editHabitIndex = null; // index of the habit being edited
 
+let categoryCursor = 0;
+
+let dayCursor = 0;
+
+let durationCursor = 0;
+
+let dayMode = "fixed"; // "fixed" or "flex"
+
+let timesPerWeek = 3;  // default flex value
+
+let timesPerWeekCursor = 2; // 0-based index into 1..7 (default points at 3)
+
+
 
 /* =====================
    RESET FORM
 ===================== */
 
 function resetForm() {
+
     habitNameBuffer = "";
-    selectedDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
+    selectedDays =
+        ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
     duration = 7;
+
     category = "Intelligence";
-    focusedFieldIndex = 0;
+
+    dayMode = "fixed";
+
+    timesPerWeek = 3;
+
+    timesPerWeekCursor = 2;
+
+    promptStep = 0;
+
+    formMode = "normal";
+
+    categoryCursor = 0;
+    dayCursor = 0;
+    durationCursor = 0;
 }
 
+
+
 /* =====================
-   RENDER FORM
+   RENDER FORM — terminal prompt style
 ===================== */
 
 function renderForm() {
+
     let panel = document.getElementById("formPanel");
+
     panel.className =
-        "box panel" + (focusPanel === "form" ? " focused" : "");
+        "box panel" +
+        (focusPanel === "form"
+            ? " focused"
+            : "");
 
     let title = "Modus: Maak Habit";
+
     if (modus === "edit") {
-        title = `Modus: Wijzig Habit: ${habits[editHabitIndex]?.name}`;
-    } else if (modus === "delete") {
-        title = `Modus: Verwijder Habit: ${habits[editHabitIndex]?.name}`;
+        title =
+            `Modus: Wijzig Habit: ${habits[editHabitIndex]?.name}`;
     }
 
-    panel.innerHTML = `<span class="panel-title">${title}</span>`;
+    else if (modus === "delete") {
+        title =
+            `Modus: Verwijder Habit: ${habits[editHabitIndex]?.name}`;
+    }
+
+    let html =
+        `<span class="panel-title">${title}</span>`;
+
+    /* =====================
+       DELETE MODE
+    ===================== */
 
     if (modus === "delete") {
-        panel.innerHTML += `
-            <div style="opacity:0.8;margin-top:10px;">
-            [ENTER] → bevestig verwijderen<br>
-            [ESC] → annuleer
-            </div>`;
+
+        html += `
+        <div style="opacity:0.8;margin-top:10px;">
+        [ENTER] → bevestig verwijderen<br>
+        [ESC] → annuleer
+        </div>`;
+
+        panel.innerHTML = html;
         return;
     }
 
-    // For create or edit
-    panel.innerHTML += `
-        ${renderNaam()}
-        ${renderCategorie()}
-        ${renderDagen()}
-        ${renderDuur()}
-        <div style="opacity:0.6;font-size:0.9rem;margin-top:8px;">
-        ENTER → ${modus === "edit" ? "opslaan wijzigingen" : "opslaan"}
+    /* =====================
+       NORMAL MODE (idle)
+    ===================== */
+
+    if (formMode === "normal") {
+
+        html += `
+        <div class="prompt-session">
+
+            <div class="prompt-idle">
+                <span class="prompt-symbol">&gt;</span>
+                <span class="prompt-idle-text">
+                    Druk [i] om een habit aan te maken
+                </span>
+            </div>
+
         </div>`;
+
+        panel.innerHTML = html;
+        return;
+    }
+
+    /* =====================
+       INSERT MODE — FULL FLOW
+    ===================== */
+
+    html += `<div class="prompt-session">`;
+
+    /* STEP 0 — NAME */
+
+    if (promptStep > 0) {
+
+        html += renderAnsweredLine(
+            "Hoe moet je habit heten?",
+            habitNameBuffer
+        );
+
+    }
+
+    else {
+
+        html += renderPromptQuestion(
+            "Hoe moet je habit heten?"
+        );
+
+        html += renderPromptInput(
+            habitNameBuffer
+        );
+    }
+
+
+    /* STEP 1 — CATEGORY */
+
+    if (promptStep > 1) {
+
+        html += renderAnsweredLine(
+            "Welke stat categorie?",
+            category
+        );
+
+    }
+
+    else if (promptStep === 1) {
+
+        html += renderPromptQuestion(
+            "Welke stat categorie?"
+        );
+
+        html += renderCategoryOptions();
+    }
+
+    else {
+
+        html += renderFutureLine(
+            "Welke stat categorie?"
+        );
+    }
+
+
+    /* STEP 2 — DAYS */
+
+    if (promptStep > 2) {
+
+        let nl =
+        {
+            Mon: "Ma", Tue: "Di", Wed: "Wo",
+            Thu: "Do", Fri: "Vr",
+            Sat: "Za", Sun: "Zo"
+        };
+
+        let dayStr =
+            dayMode === "flex"
+                ? `${timesPerWeek}× per week`
+                : selectedDays.map(d => nl[d]).join(", ");
+
+        html += renderAnsweredLine(
+            "Welke dagen?",
+            dayStr
+        );
+
+    }
+
+    else if (promptStep === 2) {
+
+        html += renderPromptQuestion(
+            "Welke dagen?"
+        );
+
+        html += renderDayOptions();
+    }
+
+    else {
+
+        html += renderFutureLine(
+            "Welke dagen?"
+        );
+    }
+
+
+    /* STEP 3 — DURATION */
+
+    if (promptStep > 3) {
+
+        html += renderAnsweredLine(
+            "Hoe lang?",
+            getDurationLabel(duration)
+        );
+
+    }
+
+    else if (promptStep === 3) {
+
+        html += renderPromptQuestion(
+            "Hoe lang?"
+        );
+
+        html += renderDurationOptions();
+    }
+
+    else {
+
+        html += renderFutureLine(
+            "Hoe lang?"
+        );
+    }
+
+
+    /* STEP 4 — CONFIRM */
+
+    if (promptStep === 4) {
+
+        html += `
+        <div class="prompt-confirm">
+
+            <span class="prompt-symbol">→</span>
+
+            <span class="prompt-action">
+
+                [ENTER]
+                ${modus === "edit"
+                ? "opslaan wijzigingen"
+                : "opslaan"}
+
+                · [ESC] annuleer
+
+            </span>
+
+        </div>`;
+    }
+
+    else {
+
+        html += renderFutureLine(
+            "Bevestigen"
+        );
+    }
+
+    html += `</div>`;
+
+    panel.innerHTML = html;
 }
 
 
-function renderNaam() {
-    let f = focusedFieldIndex === 0 ? "focused" : "";
+
+/* =====================
+   PROMPT HELPERS
+===================== */
+
+function renderAnsweredLine(question, answer) {
     return `
-<div class="formRow ${f}">
-<div class="formRow-label">Naam</div>
-> ${habitNameBuffer}${focusedFieldIndex === 0 ? "" : ""}
+<div class="prompt-answered">
+<span class="prompt-symbol">✓</span>
+<span class="prompt-q">${question}</span>
+<span class="prompt-a">${answer}</span>
 </div>`;
 }
 
-function renderCategorie() {
-    let f = focusedFieldIndex === 1 ? "focused" : "";
+function renderPromptQuestion(question) {
+    return `
+<div class="prompt-current">
+<span class="prompt-symbol">&gt;</span>
+<span class="prompt-q-active">${question}</span>
+</div>`;
+}
+
+function renderPromptInput(value) {
+    return `
+<div class="prompt-input-line">
+<span class="prompt-symbol">$</span>
+<span class="prompt-typed">${value}</span><span class="prompt-cursor">█</span>
+</div>`;
+}
+
+function renderCategoryOptions() {
+
     let opts = STAT_CATEGORIES;
-    let rows = opts.map((o, i) =>
-        `[${i + 1}] ${STAT_ICONS[o] || ""} ${category === o ? "●" : "○"} ${o}`
-    ).join("\n");
-    return `
-<div class="formRow ${f}">
-<div class="formRow-label">Categorie (Stat)</div>
-${rows}
-</div>`;
+
+    let rows = opts.map((o, i) => {
+
+        let selected = category === o;
+        let cursor = i === categoryCursor;
+        let color = STAT_COLORS[o];
+
+        return `
+        <div class="prompt-option
+            ${cursor ? " prompt-option-cursor" : ""}
+            ${selected ? " prompt-option-selected" : ""}"
+            style="${selected ? "color:" + color : ""}">
+
+            ${cursor ? ">" : " "}
+
+            ${selected ? "●" : "○"}
+
+            ${o}
+
+        </div>`;
+
+    }).join("");
+
+    rows += `
+    <div class="prompt-hint">
+        j/k → bewegen · spatie → selecteren · enter → bevestigen
+    </div>`;
+
+    return `<div class="prompt-options">${rows}</div>`;
 }
 
-function renderDagen() {
-    let f = focusedFieldIndex === 2 ? "focused" : "";
-    let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    let nl = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
+
+function renderDayOptions() {
+
+    /* FLEX MODE */
+
+    if (dayMode === "flex") {
+
+        let rows = [1, 2, 3, 4, 5, 6, 7].map((n, i) => {
+
+            let selected = timesPerWeek === n;
+            let cursor   = i === timesPerWeekCursor;
+
+            return `
+            <div class="prompt-option
+                ${cursor  ? " prompt-option-cursor"   : ""}
+                ${selected ? " prompt-option-selected" : ""}">
+
+                ${cursor ? ">" : " "}
+
+                ${selected ? "●" : "○"}
+
+                ${n}× per week
+
+            </div>`;
+
+        }).join("");
+
+        rows += `
+        <div class="prompt-hint">
+            j/k → bewegen · spatie → selecteren · TAB → vaste dagen · enter → bevestigen
+        </div>`;
+
+        return `<div class="prompt-options">${rows}</div>`;
+    }
+
+    /* FIXED DAYS MODE */
+
+    let days =
+        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    let nl =
+        ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
+
     let rows = days.map((d, i) => {
-        let mark = selectedDays.includes(d) ? "●" : "○";
-        return `[${i + 1}] ${mark} ${nl[i]}`;
-    }).join("\n");
+
+        let selected =
+            selectedDays.includes(d);
+
+        let cursor =
+            i === dayCursor;
+
+        return `
+        <div class="prompt-option
+            ${cursor ? " prompt-option-cursor" : ""}
+            ${selected ? " prompt-option-selected" : ""}">
+
+            ${cursor ? ">" : " "}
+
+            ${selected ? "●" : "○"}
+
+            ${nl[i]}
+
+        </div>`;
+
+    }).join("");
+
+    rows += `
+    <div class="prompt-hint">
+
+        j/k → bewegen · spatie → togglen · TAB → # keer/week · enter → bevestigen
+
+    </div>`;
+
+    return `<div class="prompt-options">${rows}</div>`;
+}
+
+
+function renderDurationOptions() {
+
+    let opts = [
+        { val: 7, label: "1 week" },
+        { val: 14, label: "2 weken" },
+        { val: 35, label: "5 weken" },
+        { val: 30, label: "1 maand" },
+        { val: 9999, label: "Onbeperkt" }
+    ];
+
+    let rows = opts.map((o, i) => {
+
+        let selected =
+            duration === o.val;
+
+        let cursor =
+            i === durationCursor;
+
+        return `
+        <div class="prompt-option
+            ${cursor ? " prompt-option-cursor" : ""}
+            ${selected ? " prompt-option-selected" : ""}">
+
+            ${cursor ? ">" : " "}
+
+            ${selected ? "●" : "○"}
+
+            ${o.label}
+
+        </div>`;
+
+    }).join("");
+
+    rows += `
+    <div class="prompt-hint">
+        j/k → bewegen · spatie → selecteren · enter → bevestigen
+    </div>`;
+
+    return `<div class="prompt-options">${rows}</div>`;
+}
+
+
+function getDurationLabel(val) {
+    let map = { 7: "1 week", 14: "2 weken", 35: "5 weken", 30: "1 maand", 9999: "Onbeperkt" };
+    return map[val] || val;
+}
+
+function renderFutureLine(question) {
+
     return `
-<div class="formRow ${f}">
-<div class="formRow-label">Dagen</div>
-${rows}
+<div class="prompt-future">
+
+<span class="prompt-symbol">○</span>
+
+<span class="prompt-q-future">
+${question}
+</span>
+
 </div>`;
 }
 
-function renderDuur() {
-    let f = focusedFieldIndex === 3 ? "focused" : "";
-    let opts = [
-        { key: "1", val: 7, label: "1 week" },
-        { key: "2", val: 14, label: "2 weken" },
-        { key: "3", val: 35, label: "5 weken" },
-        { key: "4", val: 30, label: "1 maand" },
-        { key: "0", val: 9999, label: "Onbeperkt" },
-    ];
-    let rows = opts.map(o =>
-        `[${o.key}] ${duration === o.val ? "●" : "○"} ${o.label}`
-    ).join("\n");
-    return `
-<div class="formRow ${f}">
-<div class="formRow-label">Duur</div>
-${rows}
-</div>`;
-}
 
 /* =====================
    SAVE HABIT
 ===================== */
 
 function saveHabit() {
+
     if (!habitNameBuffer.trim()) return;
 
     habits.push({
+
         name: habitNameBuffer.trim(),
+
         category,
-        frequency: [...selectedDays],
+
+        frequencyMode: dayMode,
+
+        frequency:
+            dayMode === "fixed"
+                ? [...selectedDays]
+                : [],
+
+        timesPerWeek:
+            dayMode === "flex"
+                ? Math.min(7, Math.max(1, timesPerWeek))
+                : null,
+
         duration,
+
         startDate: new Date(),
+
         completions: {}
+
     });
 
     resetForm();
 
-    // Stay in category field (not typing mode)
-    focusedFieldIndex = 1;
-    focusPanel = "form";
-
     renderHabitsUI();
 }
+
 
 function saveEdit() {
     if (!habitNameBuffer.trim() || editHabitIndex === null) return;
@@ -161,18 +547,14 @@ function saveEdit() {
     let h = habits[editHabitIndex];
     h.name = habitNameBuffer.trim();
     h.category = category;
-    h.frequency = [...selectedDays];
+    h.frequencyMode = dayMode;
+    h.frequency = dayMode === "fixed" ? [...selectedDays] : [];
+    h.timesPerWeek = dayMode === "flex" ? Math.min(7, Math.max(1, timesPerWeek)) : null;
     h.duration = duration;
 
-    // Reset edit state but stay in category
     modus = "create";
     editHabitIndex = null;
-    habitNameBuffer = "";
-    selectedDays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-    duration = 7;
-    category = "Intelligence";
-
-    focusedFieldIndex = 1; // never jump into name typing field
+    resetForm();
     focusPanel = "form";
 
     renderHabitsUI();
@@ -184,12 +566,11 @@ function deleteHabit() {
 
     habits.splice(editHabitIndex, 1);
 
-    // Reset form
     modus = "create";
     editHabitIndex = null;
     resetForm();
-    focusedFieldIndex = 1; // category
     focusPanel = "form";
+    formMode = "normal";
     if (selectedHabitIndex >= habits.length)
         selectedHabitIndex = Math.max(0, habits.length - 1);
 
@@ -219,7 +600,6 @@ function renderHabitList() {
     habits.forEach((h, i) => {
         let div = document.createElement("div");
         div.className = "habitItem" + (i === selectedHabitIndex ? " habitSelected" : "");
-        let done = Object.values(h.completions).filter(Boolean).length;
         div.innerText = h.name;
         panel.appendChild(div);
     });

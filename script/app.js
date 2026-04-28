@@ -22,15 +22,24 @@ function renderHotkeys() {
 
     const sep = "  │  ";
 
-    let common = `H/L→panel${sep}ESC→form`;
+    let common = `H/L→panel${sep}ESC→terug`;
+
+    let formLegend;
+    if (formMode === "insert") {
+        formLegend =
+            `FORM [INSERT]${sep}` +
+            `ENTER→volgende stap${sep}` +
+            `ESC→vorige stap / annuleer${sep}` +
+            common;
+    } else {
+        formLegend =
+            `FORM [NORMAL]${sep}` +
+            `I→habit aanmaken${sep}` +
+            common;
+    }
 
     let legend = {
-        form:
-            `FORM${sep}` +
-            `TAB→volgend veld${sep}` +
-            `ENTER→opslaan${sep}` +
-            `Naam: typen (ESC om te bewerken)${sep}Cat:1-4${sep}Dagen:1-7${sep}Duur:0-4${sep}` +
-            common,
+        form: formLegend,
 
         list:
             `LIJST${sep}` +
@@ -45,19 +54,18 @@ function renderHotkeys() {
             `↑↓ / j k→week overslaan${sep}` +
             `SPATIE→afchecken${sep}` +
             common,
-            
+
         stats:
-            typeof showSkillsPanel !== 'undefined' && showSkillsPanel ?
-            `SKILLS${sep}` +
-            `↑↓→navigeer categorie${sep}` +
-            `←→→kies active/passive${sep}` +
-            `ENTER→unlock${sep}` +
-            `S→terug naar stats${sep}` +
-            common
-            :
-            `STATS${sep}` +
-            `S→open skills panel${sep}` +
-            common
+            typeof showSkillsPanel !== 'undefined' && showSkillsPanel
+                ? `SKILLS${sep}` +
+                  `↑↓→navigeer categorie${sep}` +
+                  `←→→passive / active${sep}` +
+                  `ENTER→unlock / koop${sep}` +
+                  `S→terug naar stats${sep}` +
+                  common
+                : `STATS${sep}` +
+                  `S→open skill tree${sep}` +
+                  common,
     };
 
     panel.innerText = legend[focusPanel] ?? "";

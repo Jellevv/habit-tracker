@@ -106,6 +106,149 @@ body {
 }
 
 /* =====================
+   PROMPT STYLE FORM
+===================== */
+
+.prompt-session {
+    margin-top: 8px;
+}
+
+/* Answered (completed) prompt line */
+.prompt-answered {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    margin-bottom: 4px;
+    opacity: 0.55;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.prompt-answered .prompt-symbol {
+    color: #4ade80;
+    flex-shrink: 0;
+}
+
+.prompt-answered .prompt-q {
+    opacity: 0.7;
+}
+
+.prompt-answered .prompt-a {
+    color: #ffffff;
+    opacity: 1;
+    font-weight: bold;
+}
+
+/* Current active question */
+.prompt-current {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+}
+
+.prompt-current .prompt-symbol {
+    color: #facc15;
+    flex-shrink: 0;
+}
+
+.prompt-q-active {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* Typing input line */
+.prompt-input-line {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+}
+
+.prompt-input-line .prompt-symbol {
+    color: #60a5fa;
+    flex-shrink: 0;
+}
+
+.prompt-typed {
+    color: #ffffff;
+}
+
+.prompt-cursor {
+    color: #ffffff;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* Options list */
+.prompt-options {
+    margin-bottom: 4px;
+    margin-left: 16px;
+}
+
+.prompt-option {
+    font-size: 0.9rem;
+    opacity: 0.5;
+    line-height: 1.5;
+}
+
+.prompt-option-selected {
+    opacity: 1;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.prompt-hint {
+    font-size: 0.8rem;
+    opacity: 0.35;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/* Confirm step */
+.prompt-confirm {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    margin-top: 12px;
+    font-size: 0.95rem;
+}
+
+.prompt-confirm .prompt-symbol {
+    color: #4ade80;
+    flex-shrink: 0;
+}
+
+.prompt-action {
+    color: #4ade80;
+    font-weight: bold;
+}
+
+/* Future (not yet reached) prompt line */
+.prompt-future {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    margin-bottom: 4px;
+    opacity: 0.25;
+    font-size: 0.95rem;
+}
+
+.prompt-future .prompt-symbol {
+    flex-shrink: 0;
+}
+
+.prompt-q-future {
+    font-style: italic;
+}
+
+/* =====================
    HABIT LIST
 ===================== */
 
@@ -190,7 +333,7 @@ body {
     outline-offset: -3px;
 }
 
- .miniDay {
+.miniDay {
     font-size: 18px;
     opacity: 0.6;
     display: block;
@@ -229,7 +372,7 @@ body {
 .miniHabit-cat {
     opacity: 0.8;
     text-transform: uppercase;
-    margin-left: 1rem; 
+    margin-left: 1rem;
 }
 
 /* =====================
@@ -379,26 +522,34 @@ body {
     flex: 1.5;
 }
 
+.prompt-option-cursor {
+    background: rgba(255,255,255,0.08);
+}
+
 /* =====================
    SKILLS PANEL
 ===================== */
+
 .skill-sp-header {
     margin-bottom: 12px;
     padding-bottom: 8px;
     border-bottom: 1px dashed rgba(255,255,255,0.2);
 }
+
 .skill-trees-container {
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding-left: 2px;
 }
+
 .skill-row {
     display: flex;
     flex-direction: row;
     align-items: center;
     width: 100%;
 }
+
 .skill-cat-title {
     font-size: 0.8rem;
     letter-spacing: 0.1em;
@@ -406,6 +557,7 @@ body {
     width: 32px;
     flex-shrink: 0;
 }
+
 .skill-node {
     flex: 1;
     border: 1px solid rgba(255,255,255,0.2);
@@ -415,18 +567,23 @@ body {
     justify-content: center;
     min-width: 0;
 }
+
 .skill-node.focused {
     outline: 2px solid white;
     outline-offset: 1px;
 }
-.skill-node.unlocked, .skill-node.active {
+
+.skill-node.unlocked,
+.skill-node.active {
     background: rgba(255,255,255,0.1);
     border-width: 2px;
 }
+
 .skill-node.locked {
     opacity: 0.5;
     border-style: dashed;
 }
+
 .skill-path {
     width: 12px;
     height: 2px;
@@ -434,24 +591,29 @@ body {
     margin: 0 4px;
     flex-shrink: 0;
 }
+
 .skill-path.unlocked {
     background-color: white;
 }
+
 .sn-name {
     font-weight: bold;
     font-size: 0.75rem;
     margin-bottom: 2px;
 }
+
 .sn-cost {
     font-size: 0.7rem;
     color: #6adb6a;
 }
+
 .sn-desc {
     font-size: 0.65rem;
     opacity: 0.8;
     line-height: 1.1;
     margin-top: 4px;
 }
+
 .sn-charges {
     font-size: 0.65rem;
     color: #a78bfa;
