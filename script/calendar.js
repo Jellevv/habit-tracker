@@ -1,6 +1,7 @@
 let currentWeekIndex = 0;
 let focusedDayIndex = 0;
-
+const CALENDAR_WINDOW = 5;
+const NL_DAYS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 
 
 function renderCalendars() {
