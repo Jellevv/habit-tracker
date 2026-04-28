@@ -6,7 +6,12 @@
 
 const STAT_CATEGORIES = ["Intelligence", "Physical", "Charisma", "Spirit"];
 
-const STAT_ICONS = {};
+const STAT_ICONS = {
+    Intelligence: "🧠",
+    Physical:     "💪",
+    Charisma:     "✨",
+    Spirit:       "🌟"
+};
 
 const STAT_COLORS = {
     Intelligence: "#60a5fa",   // blue
