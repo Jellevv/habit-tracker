@@ -196,6 +196,8 @@ function renderForm() {
 
     /* STEP 2 — DAYS */
 
+    let dayQuestion = dayMode === "flex" ? "Hoe vaak?" : "Welke dagen?";
+
     if (promptStep > 2) {
 
         let nl =
@@ -211,7 +213,7 @@ function renderForm() {
                 : selectedDays.map(d => nl[d]).join(", ");
 
         html += renderAnsweredLine(
-            "Welke dagen?",
+            dayQuestion,
             dayStr
         );
 
@@ -220,7 +222,7 @@ function renderForm() {
     else if (promptStep === 2) {
 
         html += renderPromptQuestion(
-            "Welke dagen?"
+            dayQuestion
         );
 
         html += renderDayOptions();
@@ -229,7 +231,7 @@ function renderForm() {
     else {
 
         html += renderFutureLine(
-            "Welke dagen?"
+            dayQuestion
         );
     }
 
