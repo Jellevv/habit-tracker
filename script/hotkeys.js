@@ -1,25 +1,33 @@
 document.addEventListener("keydown", function (e) {
     let key = e.key.toLowerCase();
 
-    /* =====================
-       S — toggle skills panel
-       Blocked only when typing a habit name (insert mode, step 0)
-    ===================== */
+
 
     if (
         key === "s" &&
         !(focusPanel === "form" && formMode === "insert" && promptStep === 0)
     ) {
+        if (!showSkillsPanel) {
+            if (typeof draftPurchasedCount !== 'undefined') {
+                draftPurchasedCount = JSON.parse(JSON.stringify(purchasedCount));
+                draftActiveCharges = { ...activeChargesMemory };
+            }
+        } else {
+            if (typeof draftPurchasedCount !== 'undefined' && draftPurchasedCount !== null) {
+                purchasedCount = draftPurchasedCount;
+                activeChargesMemory = draftActiveCharges;
+                draftPurchasedCount = null;
+                draftActiveCharges = null;
+            }
+        }
+
         showSkillsPanel = !showSkillsPanel;
         if (showSkillsPanel) focusPanel = "stats";
         renderHabitsUI();
         return;
     }
 
-    /* =====================
-       SKILLS PANEL NAVIGATION
-       (when stats panel is focused and skills tree is open)
-    ===================== */
+
 
     if (focusPanel === "stats" && showSkillsPanel) {
 
@@ -30,13 +38,13 @@ document.addEventListener("keydown", function (e) {
         }
 
         if (key === "arrowup" || key === "k") {
-            focusedSkillCol = (focusedSkillCol + 4) % 5; // -1 mod 5
+            focusedSkillCol = (focusedSkillCol + 4) % 5;
             renderHabitsUI();
             return;
         }
 
         if (key === "arrowright" || key === "arrowleft") {
-            // Only stat categories (0-3) have an active node; Global (4) is passive only
+
             if (focusedSkillCol < 4) {
                 focusedSkillRow = focusedSkillRow === 0 ? 1 : 0;
             } else {
@@ -53,18 +61,14 @@ document.addEventListener("keydown", function (e) {
         }
     }
 
-    /* =====================
-       H / L — panel switch (vim-style)
-       Blocked when typing in insert mode at name step
-    ===================== */
+
 
     if (
         (key === "h" || key === "l") &&
         !(focusPanel === "form" && formMode === "insert" && promptStep === 0)
     ) {
-        // In insert mode on non-name steps, h/l should not switch panels
         if (focusPanel === "form" && formMode === "insert") {
-            // fall through to form handler below
+
         } else {
             let panels = ["form", "list", "calendar", "stats"];
             let idx = panels.indexOf(focusPanel);
@@ -86,26 +90,30 @@ document.addEventListener("keydown", function (e) {
         }
     }
 
-    /* =====================
-       ESCAPE — back / cancel
-    ===================== */
+
 
     if (key === "escape") {
-        // Close skills panel if open
+
         if (showSkillsPanel) {
+            if (typeof draftPurchasedCount !== 'undefined' && draftPurchasedCount !== null) {
+                purchasedCount = draftPurchasedCount;
+                activeChargesMemory = draftActiveCharges;
+                draftPurchasedCount = null;
+                draftActiveCharges = null;
+            }
             showSkillsPanel = false;
             renderHabitsUI();
             return;
         }
 
-        // If in insert mode, step back or cancel
+
         if (focusPanel === "form" && formMode === "insert") {
             if (promptStep > 0) {
                 promptStep--;
                 renderHabitsUI();
                 return;
             }
-            // At step 0 — cancel entirely
+
             modus = "create";
             editHabitIndex = null;
             resetForm();
@@ -114,7 +122,7 @@ document.addEventListener("keydown", function (e) {
             return;
         }
 
-        // Default — focus form, normal mode
+
         focusPanel = "form";
         formMode = "normal";
         promptStep = 0;
@@ -123,12 +131,10 @@ document.addEventListener("keydown", function (e) {
     }
 
 
-    /* =====================
-       FORM panel
-    ===================== */
+
 
     if (focusPanel === "form") {
-        // Normal mode — press i to enter insert mode
+
         if (formMode === "normal") {
             if (key === "i") {
                 formMode = "insert";
@@ -138,14 +144,12 @@ document.addEventListener("keydown", function (e) {
             return;
         }
 
-        // Insert mode — delegate to prompt handler
+
         handlePromptInput(e, key);
         return;
     }
 
-    /* =====================
-       LIST — J/K or ↑↓
-    ===================== */
+
 
     if (focusPanel === "list") {
         if ((key === "j" || key === "arrowdown") &&
@@ -160,22 +164,22 @@ document.addEventListener("keydown", function (e) {
             renderHabitsUI();
         }
 
-        // D — delete selected habit
+
         if (key === "d" && habits.length > 0) {
             modus = "delete";
             editHabitIndex = selectedHabitIndex;
             focusPanel = "form";
-            formMode = "insert"; // enter insert mode for delete confirmation
+            formMode = "insert";
             renderHabitsUI();
             return;
         }
 
-        // E — edit habit
+
         if (key === "e" && habits.length > 0) {
             modus = "edit";
             editHabitIndex = selectedHabitIndex;
 
-            // Load habit data into form buffers
+
             let h = habits[editHabitIndex];
             habitNameBuffer = h.name;
             category = h.category;
@@ -187,21 +191,19 @@ document.addEventListener("keydown", function (e) {
 
             focusPanel = "form";
             formMode = "insert";
-            promptStep = 0; // start from name
+            promptStep = 0;
             renderHabitsUI();
             return;
         }
     }
 
-    /* =====================
-       CALENDAR — arrow navigation + space toggle
-    ===================== */
+
 
     if (focusPanel === "calendar") {
         let habit = habits[selectedHabitIndex];
         if (!habit) return;
 
-        /* FLEX MODE NAVIGATION */
+
 
         if (habit.frequencyMode === "flex") {
 
@@ -251,7 +253,7 @@ document.addEventListener("keydown", function (e) {
             return;
         }
 
-        /* FIXED MODE */
+
 
         let totalDays =
             habit.duration === 9999 ? 365 : habit.duration;
@@ -259,7 +261,7 @@ document.addEventListener("keydown", function (e) {
         let startDate =
             new Date(habit.startDate);
 
-        // Build list of allowed day indices
+
         let allowedDays = [];
         for (let i = 0; i < totalDays; i++) {
             let d = new Date(startDate);
@@ -315,9 +317,7 @@ document.addEventListener("keydown", function (e) {
     }
 });
 
-/* =====================
-   Jump to first incomplete allowed day
-===================== */
+
 
 function jumpToFirstOpenDay() {
     let habit = habits[selectedHabitIndex];
@@ -343,13 +343,11 @@ function jumpToFirstOpenDay() {
     }
 }
 
-/* =====================
-   PROMPT INPUT HANDLING
-===================== */
+
 
 function handlePromptInput(e, key) {
 
-    /* DELETE MODE — only enter/esc */
+
     if (modus === "delete") {
         if (key === "enter") {
             deleteHabit();
@@ -357,7 +355,7 @@ function handlePromptInput(e, key) {
         return;
     }
 
-    /* STEP 0: NAME — free typing */
+
     if (promptStep === 0) {
         if (key === "enter") {
             if (habitNameBuffer.trim()) {
@@ -380,19 +378,21 @@ function handlePromptInput(e, key) {
         }
     }
 
-    /* STEP 1: CATEGORY */
+
     if (promptStep === 1) {
 
         let max = STAT_CATEGORIES.length - 1;
 
         if (key === "j") {
             categoryCursor = Math.min(max, categoryCursor + 1);
+            category = STAT_CATEGORIES[categoryCursor];
             renderHabitsUI();
             return;
         }
 
         if (key === "k") {
             categoryCursor = Math.max(0, categoryCursor - 1);
+            category = STAT_CATEGORIES[categoryCursor];
             renderHabitsUI();
             return;
         }
@@ -411,12 +411,12 @@ function handlePromptInput(e, key) {
     }
 
 
-    /* STEP 2: DAYS OR TIMES */
+
     if (promptStep === 2) {
 
         let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-        /* TAB → switch fixed/flex mode */
+
         if (key === "tab") {
             e.preventDefault();
             dayMode = dayMode === "fixed" ? "flex" : "fixed";
@@ -424,7 +424,7 @@ function handlePromptInput(e, key) {
             return;
         }
 
-        /* FIXED DAYS MODE */
+
 
         if (dayMode === "fixed") {
 
@@ -451,18 +451,20 @@ function handlePromptInput(e, key) {
             }
         }
 
-        /* FLEX MODE */
+
 
         if (dayMode === "flex") {
 
             if (key === "j") {
                 timesPerWeekCursor = Math.min(6, timesPerWeekCursor + 1);
+                timesPerWeek = timesPerWeekCursor + 1;
                 renderHabitsUI();
                 return;
             }
 
             if (key === "k") {
                 timesPerWeekCursor = Math.max(0, timesPerWeekCursor - 1);
+                timesPerWeek = timesPerWeekCursor + 1;
                 renderHabitsUI();
                 return;
             }
@@ -474,7 +476,7 @@ function handlePromptInput(e, key) {
             }
         }
 
-        /* ENTER → next step */
+
         if (key === "enter") {
             promptStep = 3;
             renderHabitsUI();
@@ -483,19 +485,21 @@ function handlePromptInput(e, key) {
     }
 
 
-    /* STEP 3: DURATION */
+
     if (promptStep === 3) {
 
         let opts = [7, 14, 35, 30, 9999];
 
         if (key === "j") {
             durationCursor = Math.min(4, durationCursor + 1);
+            duration = opts[durationCursor];
             renderHabitsUI();
             return;
         }
 
         if (key === "k") {
             durationCursor = Math.max(0, durationCursor - 1);
+            duration = opts[durationCursor];
             renderHabitsUI();
             return;
         }
@@ -514,7 +518,7 @@ function handlePromptInput(e, key) {
     }
 
 
-    /* STEP 4: CONFIRM — enter to save */
+
     if (promptStep === 4) {
         if (key === "enter") {
             if (modus === "create") {

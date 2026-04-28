@@ -13,10 +13,6 @@ function renderLayout() {
     renderHabitsUI();
 }
 
-/* =====================
-   HOTKEY LEGEND (single line per panel)
-===================== */
-
 function renderHotkeys() {
     let panel = document.getElementById("hotkeysPanel");
 

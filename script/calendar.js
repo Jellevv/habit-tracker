@@ -1,15 +1,7 @@
 let currentWeekIndex = 0;
 let focusedDayIndex = 0;
 
-/* Number of weeks visible in the full calendar view */
-const CALENDAR_WINDOW = 5;
 
-/* Dutch day labels (display only; internal keys stay English) */
-const NL_DAYS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
-
-/* =====================
-   DISPATCH
-===================== */
 
 function renderCalendars() {
 
@@ -22,7 +14,7 @@ function renderCalendars() {
             ? " focused"
             : "");
 
-    /* Clear panel */
+
 
     panel.innerHTML =
         `<span class="panel-title">Kalender</span>`;
@@ -37,7 +29,7 @@ function renderCalendars() {
         return;
     }
 
-    /* MINI VIEW → show ALL habits */
+
 
     if (focusPanel !== "calendar") {
 
@@ -47,7 +39,7 @@ function renderCalendars() {
         return;
     }
 
-    /* FULL VIEW → show SELECTED habit */
+
 
     renderFullHabitCalendar();
 }
@@ -62,7 +54,7 @@ function renderFlexCalendar(habit, panel) {
             ? 52
             : Math.ceil(habit.duration / 7);
 
-    /* Progress */
+
 
     let done =
         Object.values(habit.completions)
@@ -76,7 +68,7 @@ function renderFlexCalendar(habit, panel) {
 
     panel.appendChild(meta);
 
-    /* Slot header row (1 … times) */
+
 
     let headerRow = document.createElement("div");
     headerRow.className = "weekRow";
@@ -90,14 +82,14 @@ function renderFlexCalendar(habit, panel) {
 
     panel.appendChild(headerRow);
 
-    /* Windowed rendering — mirror the fixed-calendar CALENDAR_WINDOW logic */
+
 
     let half     = Math.floor(CALENDAR_WINDOW / 2);
     let startWeek = Math.max(0, currentWeekIndex - half);
     let endWeek   = Math.min(weeks - 1, startWeek + CALENDAR_WINDOW - 1);
     startWeek     = Math.max(0, endWeek - CALENDAR_WINDOW + 1); // re-clamp
 
-    /* "More above" hint */
+
 
     if (startWeek > 0) {
         let hint = document.createElement("div");
@@ -106,7 +98,7 @@ function renderFlexCalendar(habit, panel) {
         panel.appendChild(hint);
     }
 
-    /* Render visible weeks */
+
 
     for (let w = startWeek; w <= endWeek; w++) {
 
@@ -138,7 +130,7 @@ function renderFlexCalendar(habit, panel) {
         panel.appendChild(weekRow);
     }
 
-    /* "More below" hint */
+
 
     if (endWeek < weeks - 1) {
         let hint = document.createElement("div");
@@ -148,9 +140,7 @@ function renderFlexCalendar(habit, panel) {
     }
 }
 
-/* =====================
-   MINI WEEK (sidebar preview)
-===================== */
+
 
 function renderMiniWeek(habit) {
     let panel = document.getElementById("calendarPanel");
@@ -242,9 +232,7 @@ function renderMiniFlex(habit, panel) {
 }
 
 
-/* =====================
-   FULL CALENDAR — windowed
-===================== */
+
 
 function renderFullHabitCalendar() {
     let panel =
@@ -255,7 +243,7 @@ function renderFullHabitCalendar() {
 
     if (!habit) return;
 
-    /* FLEX MODE */
+
 
     if (habit.frequencyMode === "flex") {
 
@@ -271,17 +259,17 @@ function renderFullHabitCalendar() {
     let totalCells = totalDays + offset;
     let totalWeeks = Math.ceil(totalCells / 7);
 
-    /* Which week contains the focused day? */
+
     let focusedCell = focusedDayIndex + offset;
     let focusedWeek = Math.floor(focusedCell / 7);
 
-    /* Window: center on focused week */
+
     let half = Math.floor(CALENDAR_WINDOW / 2);
     let startWeek = Math.max(0, focusedWeek - half);
     let endWeek = Math.min(totalWeeks - 1, startWeek + CALENDAR_WINDOW - 1);
     startWeek = Math.max(0, endWeek - CALENDAR_WINDOW + 1); // re-clamp
 
-    /* Progress */
+
     let progress = getProgress(habit, totalDays, startDate);
     let meta = document.createElement("div");
     meta.className = "calendarMeta";
@@ -290,7 +278,7 @@ function renderFullHabitCalendar() {
         `${formatDate(startDate)}`;
     panel.appendChild(meta);
 
-    /* Weekday header row */
+
     let headerRow = document.createElement("div");
     headerRow.className = "weekRow";
     NL_DAYS.forEach((nl) => {
@@ -301,7 +289,7 @@ function renderFullHabitCalendar() {
     });
     panel.appendChild(headerRow);
 
-    /* "More above" hint */
+
     if (startWeek > 0) {
         let hint = document.createElement("div");
         hint.className = "scrollHint";
@@ -309,7 +297,7 @@ function renderFullHabitCalendar() {
         panel.appendChild(hint);
     }
 
-    /* Render weeks in window */
+
     for (let w = startWeek; w <= endWeek; w++) {
         let weekRow = document.createElement("div");
         weekRow.className = "weekRow";
@@ -345,7 +333,7 @@ function renderFullHabitCalendar() {
         panel.appendChild(weekRow);
     }
 
-    /* "More below" hint */
+
     if (endWeek < totalWeeks - 1) {
         let hint = document.createElement("div");
         hint.className = "scrollHint";
@@ -354,9 +342,7 @@ function renderFullHabitCalendar() {
     }
 }
 
-/* =====================
-   TOGGLE DAY
-===================== */
+
 
 function toggleFocusedDay() {
 
@@ -365,7 +351,7 @@ function toggleFocusedDay() {
     let habit =
         habits[selectedHabitIndex];
 
-    /* FLEX MODE */
+
 
     if (habit.frequencyMode === "flex") {
 
@@ -375,7 +361,7 @@ function toggleFocusedDay() {
         let isCurrentlyDone = !!habit.completions[key];
         habit.completions[key] = !isCurrentlyDone;
 
-        // Handle active booster charges for flex completions
+
         if (!isCurrentlyDone) {
             if (typeof activeChargesMemory !== 'undefined' &&
                 activeChargesMemory[habit.category] > 0) {
@@ -394,7 +380,7 @@ function toggleFocusedDay() {
         return;
     }
 
-    /* FIXED MODE */
+
 
     let startDate =
         new Date(habit.startDate);
@@ -417,7 +403,7 @@ function toggleFocusedDay() {
 
     habit.completions[key] = !isCurrentlyDone;
 
-    // Handle active booster charges
+
     if (!isCurrentlyDone) {
         if (typeof activeChargesMemory !== 'undefined' &&
             activeChargesMemory[habit.category] > 0) {
@@ -437,9 +423,7 @@ function toggleFocusedDay() {
 
 
 
-/* =====================
-   WEEK NAVIGATION (mini view)
-===================== */
+
 
 function moveWeek(direction) {
     if (habits.length === 0) return;
@@ -457,9 +441,7 @@ function moveWeek(direction) {
     renderHabitsUI();
 }
 
-/* =====================
-   HELPERS
-===================== */
+
 
 function getProgress(habit, totalDays, startDate) {
     let done = Object.values(habit.completions).filter(Boolean).length;

@@ -4,9 +4,9 @@ let selectedHabitIndex = 0;
 
 let focusPanel = "form";
 
-let formMode = "normal"; // "normal" or "insert"
+let formMode = "normal";
 
-let promptStep = 0; // 0=name, 1=category, 2=days, 3=duration, 4=confirm
+let promptStep = 0;
 
 let formFields =
     ["naam", "categorie", "dagen", "duur"];
@@ -20,9 +20,9 @@ let duration = 7;
 
 let category = "Intelligence";
 
-let modus = "create"; // can be "create", "edit", or "delete"
+let modus = "create";
 
-let editHabitIndex = null; // index of the habit being edited
+let editHabitIndex = null;
 
 let categoryCursor = 0;
 
@@ -30,17 +30,13 @@ let dayCursor = 0;
 
 let durationCursor = 0;
 
-let dayMode = "fixed"; // "fixed" or "flex"
-
-let timesPerWeek = 3;  // default flex value
-
-let timesPerWeekCursor = 2; // 0-based index into 1..7 (default points at 3)
+let dayMode = "fixed";
+let timesPerWeek = 3;
+let timesPerWeekCursor = 2;
 
 
 
-/* =====================
-   RESET FORM
-===================== */
+
 
 function resetForm() {
 
@@ -70,9 +66,7 @@ function resetForm() {
 
 
 
-/* =====================
-   RENDER FORM — terminal prompt style
-===================== */
+
 
 function renderForm() {
 
@@ -99,9 +93,7 @@ function renderForm() {
     let html =
         `<span class="panel-title">${title}</span>`;
 
-    /* =====================
-       DELETE MODE
-    ===================== */
+
 
     if (modus === "delete") {
 
@@ -115,9 +107,7 @@ function renderForm() {
         return;
     }
 
-    /* =====================
-       NORMAL MODE (idle)
-    ===================== */
+
 
     if (formMode === "normal") {
 
@@ -137,13 +127,11 @@ function renderForm() {
         return;
     }
 
-    /* =====================
-       INSERT MODE — FULL FLOW
-    ===================== */
+
 
     html += `<div class="prompt-session">`;
 
-    /* STEP 0 — NAME */
+
 
     if (promptStep > 0) {
 
@@ -166,7 +154,7 @@ function renderForm() {
     }
 
 
-    /* STEP 1 — CATEGORY */
+
 
     if (promptStep > 1) {
 
@@ -194,7 +182,7 @@ function renderForm() {
     }
 
 
-    /* STEP 2 — DAYS */
+
 
     let dayQuestion = dayMode === "flex" ? "Hoe vaak?" : "Welke dagen?";
 
@@ -236,7 +224,7 @@ function renderForm() {
     }
 
 
-    /* STEP 3 — DURATION */
+
 
     if (promptStep > 3) {
 
@@ -264,7 +252,7 @@ function renderForm() {
     }
 
 
-    /* STEP 4 — CONFIRM */
+
 
     if (promptStep === 4) {
 
@@ -301,9 +289,7 @@ function renderForm() {
 
 
 
-/* =====================
-   PROMPT HELPERS
-===================== */
+
 
 function renderAnsweredLine(question, answer) {
     return `
@@ -358,7 +344,7 @@ function renderCategoryOptions() {
 
     rows += `
     <div class="prompt-hint">
-        j/k → bewegen · spatie → selecteren · enter → bevestigen
+        j/k → bewegen · enter → bevestigen
     </div>`;
 
     return `<div class="prompt-options">${rows}</div>`;
@@ -367,7 +353,7 @@ function renderCategoryOptions() {
 
 function renderDayOptions() {
 
-    /* FLEX MODE */
+
 
     if (dayMode === "flex") {
 
@@ -393,13 +379,13 @@ function renderDayOptions() {
 
         rows += `
         <div class="prompt-hint">
-            j/k → bewegen · spatie → selecteren · TAB → vaste dagen · enter → bevestigen
+            j/k → bewegen · TAB → vaste dagen · enter → bevestigen
         </div>`;
 
         return `<div class="prompt-options">${rows}</div>`;
     }
 
-    /* FIXED DAYS MODE */
+
 
     let days =
         ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -476,7 +462,7 @@ function renderDurationOptions() {
 
     rows += `
     <div class="prompt-hint">
-        j/k → bewegen · spatie → selecteren · enter → bevestigen
+        j/k → bewegen · enter → bevestigen
     </div>`;
 
     return `<div class="prompt-options">${rows}</div>`;
@@ -503,9 +489,7 @@ ${question}
 }
 
 
-/* =====================
-   SAVE HABIT
-===================== */
+
 
 function saveHabit() {
 
@@ -580,9 +564,7 @@ function deleteHabit() {
 }
 
 
-/* =====================
-   HABIT LIST
-===================== */
+
 
 function renderHabitList() {
     let panel = document.getElementById("listPanel");
@@ -607,9 +589,7 @@ function renderHabitList() {
     });
 }
 
-/* =====================
-   MAIN RENDER
-===================== */
+
 
 function renderHabitsUI() {
     renderForm();

@@ -1,8 +1,4 @@
-/* =====================
-   STATS & LEVEL SYSTEM
-   Each completed habit day = 10 XP for its stat category
-   Level = floor(sqrt(totalXP / 25)) + 1  (caps at 99)
-===================== */
+
 
 const STAT_CATEGORIES = ["Intelligence", "Physical", "Charisma", "Spirit"];
 
@@ -14,23 +10,20 @@ const STAT_ICONS = {
 };
 
 const STAT_COLORS = {
-    Intelligence: "#60a5fa",   // blue
-    Physical:     "#f87171",   // red
-    Charisma:     "#facc15",   // gold
-    Spirit:       "#a78bfa"    // purple
+    Intelligence: "#60a5fa",
+    Physical:     "#f87171",
+    Charisma:     "#facc15",
+    Spirit:       "#a78bfa"
 };
 
 const XP_PER_COMPLETION = 10;
 
-/* =====================
-   CALCULATE XP per stat
-===================== */
+
 
 function getStatXP() {
     let xp = {};
     STAT_CATEGORIES.forEach(s => xp[s] = 0);
 
-    // Global booster check
     let hasGlobal = purchasedCount["glo_b"] >= 1;
 
     habits.forEach(h => {
@@ -39,16 +32,14 @@ function getStatXP() {
         
         let baseXP = done * XP_PER_COMPLETION;
         
-        // Passive hook
         let passiveNode = SKILLS_DATA[h.category] && SKILLS_DATA[h.category].passive;
         if (passiveNode && purchasedCount[passiveNode.id]) {
-            baseXP += done * 2; // +2 per completion
+            baseXP += done * 2;
         }
 
         xp[h.category] += baseXP;
     });
 
-    // Active boosters hook
     STAT_CATEGORIES.forEach(s => {
         if (typeof activeChargesUsed !== 'undefined' && activeChargesUsed[s]) {
              xp[s] += activeChargesUsed[s] * (XP_PER_COMPLETION * 1.0);
@@ -62,11 +53,7 @@ function getStatXP() {
     return xp;
 }
 
-/* =====================
-   XP → LEVEL
-   Leveling curve: level N requires N² * 25 total XP
-   Level 1 = 0 XP, Level 2 = 25 XP, Level 3 = 100 XP, ...
-===================== */
+
 
 function getLevel(xp) {
     let lvl = Math.floor(Math.sqrt(xp / 25)) + 1;
@@ -82,9 +69,7 @@ function getXPForNextLevel(level) {
     return level * level * 25;
 }
 
-/* =====================
-   OVERALL LEVEL (average of all stats)
-===================== */
+
 
 function getOverallLevel(xpMap) {
     let totalXP = 0;
@@ -92,9 +77,7 @@ function getOverallLevel(xpMap) {
     return getLevel(totalXP);
 }
 
-/* =====================
-   RENDER STATS PANEL
-===================== */
+
 
 function renderStats() {
     let panel = document.getElementById("statsPanel");
@@ -118,7 +101,7 @@ function renderStats() {
 
     let html = `<span class="panel-title">Stats & Level</span>`;
 
-    /* Overall level display */
+
     html += `<div class="stat-overall">`;
     html += `<div class="stat-overall-label">OVERALL LEVEL</div>`;
     html += `<div class="stat-overall-level">${overallLvl}</div>`;
@@ -131,10 +114,10 @@ function renderStats() {
     }
     html += `</div>`;
 
-    /* Separator */
+
     html += `<div class="stat-separator">──────────────────</div>`;
 
-    /* Per-stat rows */
+
     STAT_CATEGORIES.forEach(stat => {
         let xp = xpMap[stat];
         let lvl = getLevel(xp);
@@ -160,7 +143,7 @@ function renderStats() {
         html += `</div>`;
     });
 
-    /* Stat summary table */
+
     html += `<div class="stat-separator">──────────────────</div>`;
     html += `<div class="stat-table">`;
     html += `<div class="stat-table-header">`;
