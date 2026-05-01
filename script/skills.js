@@ -5,83 +5,83 @@ let focusedSkillCol = 0;
 let focusedSkillRow = 0;
 
 const SKILLS_DATA = {
-  cols: ["Intelligence", "Physical", "Charisma", "Spirit", "Global"],
-  Intelligence: {
+  cols: ["Intelligentie", "Fysiek", "Charisma", "Geest", "Globaal"],
+  Intelligentie: {
     passive: {
       id: "int_p",
-      name: "Scholar",
+      name: "Geleerde",
       cost: 1,
-      desc: "+2 XP per Int. habit",
+      desc: "+2 XP per Intel. habit",
     },
     active: {
       id: "int_a",
       name: "Focus Boost",
       cost: 2,
-      desc: "10x +100% Int. XP",
+      desc: "10x +100% Intel. XP",
       charges: 10,
     },
   },
-  Physical: {
+  Fysiek: {
     passive: {
       id: "phy_p",
-      name: "Endurance",
+      name: "Uithoudingsvermogen",
       cost: 1,
-      desc: "+2 XP per Phys. habit",
+      desc: "+2 XP per Fysiek. habit",
     },
     active: {
       id: "phy_a",
       name: "Adrenaline",
       cost: 2,
-      desc: "10x +100% Phys. XP",
+      desc: "10x +100% Fysiek. XP",
       charges: 10,
     },
   },
   Charisma: {
     passive: {
       id: "cha_p",
-      name: "Charm",
+      name: "Charme",
       cost: 1,
-      desc: "+2 XP per Cha. habit",
+      desc: "+2 XP per Char. habit",
     },
     active: {
       id: "cha_a",
-      name: "Inspire",
+      name: "Inspiratie",
       cost: 2,
-      desc: "10x +100% Cha. XP",
+      desc: "10x +100% Char. XP",
       charges: 10,
     },
   },
-  Spirit: {
+  Geest: {
     passive: {
       id: "spi_p",
       name: "Zen",
       cost: 1,
-      desc: "+2 XP per Spi. habit",
+      desc: "+2 XP per Geest. habit",
     },
     active: {
       id: "spi_a",
-      name: "Enlighten",
+      name: "Verlichting",
       cost: 2,
-      desc: "10x +100% Spi. XP",
+      desc: "10x +100% Geest. XP",
       charges: 10,
     },
   },
-  Global: {
+  Globaal: {
     passive: {
       id: "glo_b",
       name: "Allrounder",
       cost: 3,
-      desc: "+15% XP totaal bij LVL 5",
+      desc: "+15% XP totaal bij NIV 5",
     },
   },
 };
 
 let purchasedCount = {};
 let activeChargesUsed = {
-  Intelligence: 0,
-  Physical: 0,
+  Intelligentie: 0,
+  Fysiek: 0,
   Charisma: 0,
-  Spirit: 0,
+  Geest: 0,
 };
 
 let draftPurchasedCount = null;
@@ -156,10 +156,10 @@ function getActiveCharges(cat) {
 }
 
 let activeChargesMemory = {
-  Intelligence: 0,
-  Physical: 0,
+  Intelligentie: 0,
+  Fysiek: 0,
   Charisma: 0,
-  Spirit: 0,
+  Geest: 0,
 };
 
 function attemptBuyFocusedSkill() {
@@ -201,11 +201,11 @@ function renderSkillsUI() {
   let totalSP = getTotalSP();
   let availSP = getAvailableSP();
 
-  let html = `<span class="panel-title">Skill Tree</span>`;
+  let html = `<span class="panel-title">Vaardighedenboom</span>`;
   html += `<div class="skill-sp-header">
                 <div>Beschikbare SP: <span style="color:#6adb6a;font-weight:bold">${availSP}</span></div>
-                <div style="opacity:0.5;font-size:0.8rem">Totaal verdiend: ${totalSP} (1 SP per overall level)</div>
-                <div style="opacity:0.5;font-size:0.8rem;margin-top:4px;">[S] Terug naar Stats  ·  [ENTER] Unlock / Buy</div>
+                <div style="opacity:0.5;font-size:0.8rem">Totaal verdiend: ${totalSP} (1 SP per totaal niveau)</div>
+                <div style="opacity:0.5;font-size:0.8rem;margin-top:4px;">[S] Terug naar Stats  ·  [ENTER] Ontgrendel / Koop</div>
              </div>`;
 
   html += `<div class="skill-trees-container">`;
@@ -242,7 +242,7 @@ function renderSkillsUI() {
       html += `<div class="sn-name">${aNode.name}</div>`;
       html += `<div class="sn-desc">${aNode.desc} <span class="sn-cost">(${aNode.cost} SP)</span></div>`;
       if (charges > 0) {
-        html += `<div class="sn-charges">${charges} charges</div>`;
+        html += `<div class="sn-charges">${charges} beurten</div>`;
       }
       html += `</div>`;
     }

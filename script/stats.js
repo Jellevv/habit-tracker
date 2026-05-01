@@ -1,19 +1,19 @@
 
 
-const STAT_CATEGORIES = ["Intelligence", "Physical", "Charisma", "Spirit"];
+const STAT_CATEGORIES = ["Intelligentie", "Fysiek", "Charisma", "Geest"];
 
 const STAT_ICONS = {
-    Intelligence: "🧠",
-    Physical:     "💪",
-    Charisma:     "✨",
-    Spirit:       "🌟"
+    Intelligentie: "🧠",
+    Fysiek:        "💪",
+    Charisma:      "✨",
+    Geest:         "🌟"
 };
 
 const STAT_COLORS = {
-    Intelligence: "#60a5fa",
-    Physical:     "#f87171",
-    Charisma:     "#facc15",
-    Spirit:       "#a78bfa"
+    Intelligentie: "#60a5fa",
+    Fysiek:        "#f87171",
+    Charisma:      "#facc15",
+    Geest:         "#a78bfa"
 };
 
 const XP_PER_COMPLETION = 10;
@@ -99,18 +99,18 @@ function renderStats() {
     let overallProg = overallNext === Infinity ? 1 :
         (overallXP - overallCurr) / (overallNext - overallCurr);
 
-    let html = `<span class="panel-title">Stats & Level</span>`;
+    let html = `<span class="panel-title">Stats & Niveau</span>`;
 
 
     html += `<div class="stat-overall">`;
-    html += `<div class="stat-overall-label">OVERALL LEVEL</div>`;
+    html += `<div class="stat-overall-label">TOTAAL NIVEAU</div>`;
     html += `<div class="stat-overall-level">${overallLvl}</div>`;
     html += `<div class="stat-overall-xp">${overallXP} XP totaal</div>`;
     html += renderProgressBar(overallProg, "#ffffff");
     if (overallNext !== Infinity) {
-        html += `<div class="stat-xp-hint">${overallXP - overallCurr} / ${overallNext - overallCurr} XP naar LVL ${overallLvl + 1}</div>`;
+        html += `<div class="stat-xp-hint">${overallXP - overallCurr} / ${overallNext - overallCurr} XP naar NIV ${overallLvl + 1}</div>`;
     } else {
-        html += `<div class="stat-xp-hint">MAX LEVEL</div>`;
+        html += `<div class="stat-xp-hint">MAXIMAAL NIVEAU</div>`;
     }
     html += `</div>`;
 
@@ -132,12 +132,12 @@ function renderStats() {
         html += `<div class="stat-row-header">`;
         html += `<span class="stat-icon">${icon}</span>`;
         html += `<span class="stat-name" style="color:${color}">${stat}</span>`;
-        html += `<span class="stat-lvl">LVL ${lvl}</span>`;
+        html += `<span class="stat-lvl">NIV ${lvl}</span>`;
         html += `</div>`;
         html += renderProgressBar(progress, color);
         html += `<div class="stat-xp-detail">${xp} XP`;
         if (nextXP !== Infinity) {
-            html += ` · ${nextXP - xp} XP tot LVL ${lvl + 1}`;
+            html += ` · ${nextXP - xp} XP tot NIV ${lvl + 1}`;
         }
         html += `</div>`;
         html += `</div>`;
@@ -148,7 +148,7 @@ function renderStats() {
     html += `<div class="stat-table">`;
     html += `<div class="stat-table-header">`;
     html += `<span class="stat-table-col">STAT</span>`;
-    html += `<span class="stat-table-col">LVL</span>`;
+    html += `<span class="stat-table-col">NIV</span>`;
     html += `<span class="stat-table-col">XP</span>`;
     html += `</div>`;
 

@@ -18,7 +18,7 @@ let selectedDays =
 
 let duration = 7;
 
-let category = "Intelligence";
+let category = "Intelligentie";
 
 let modus = "create";
 
@@ -47,7 +47,7 @@ function resetForm() {
 
     duration = 7;
 
-    category = "Intelligence";
+    category = "Intelligentie";
 
     dayMode = "fixed";
 
@@ -344,7 +344,7 @@ function renderCategoryOptions() {
 
     rows += `
     <div class="prompt-hint">
-        j/k → bewegen · enter → bevestigen
+        j/k of ↑↓ → bewegen · enter → bevestigen
     </div>`;
 
     return `<div class="prompt-options">${rows}</div>`;
@@ -379,7 +379,7 @@ function renderDayOptions() {
 
         rows += `
         <div class="prompt-hint">
-            j/k → bewegen · TAB → vaste dagen · enter → bevestigen
+            j/k of ↑↓ → bewegen · TAB → vaste dagen · enter → bevestigen
         </div>`;
 
         return `<div class="prompt-options">${rows}</div>`;
@@ -419,7 +419,7 @@ function renderDayOptions() {
     rows += `
     <div class="prompt-hint">
 
-        j/k → bewegen · spatie → togglen · TAB → # keer/week · enter → bevestigen
+        j/k of ↑↓ → bewegen · spatie → togglen · TAB → # keer/week · enter → bevestigen
 
     </div>`;
 
@@ -462,7 +462,7 @@ function renderDurationOptions() {
 
     rows += `
     <div class="prompt-hint">
-        j/k → bewegen · enter → bevestigen
+        j/k of ↑↓ → bewegen · enter → bevestigen
     </div>`;
 
     return `<div class="prompt-options">${rows}</div>`;
@@ -573,11 +573,11 @@ function renderHabitList() {
         "box panel" + (focusPanel === "list" ? " focused" : "");
 
     panel.innerHTML =
-        `<span class="panel-title">Habits (${habits.length})</span>`;
+        `<span class="panel-title">Gewoontes (${habits.length})</span>`;
 
     if (habits.length === 0) {
         panel.innerHTML +=
-            `<div style="opacity:0.6;font-size:11px;">Nog geen habits.<br>Maak er één in het formulier.</div>`;
+            `<div style="opacity:0.6;font-size:11px;">Nog geen gewoontes.<br>Maak er één in het formulier.</div>`;
         return;
     }
 

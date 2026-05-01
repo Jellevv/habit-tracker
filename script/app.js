@@ -18,18 +18,18 @@ function renderHotkeys() {
 
     const sep = "  │  ";
 
-    let common = `H/L→panel${sep}ESC→terug`;
+    let common = `H/L→paneel${sep}ESC→terug`;
 
     let formLegend;
     if (formMode === "insert") {
         formLegend =
-            `FORM [INSERT]${sep}` +
+            `FORMULIER [INSERT]${sep}` +
             `ENTER→volgende stap${sep}` +
             `ESC→vorige stap / annuleer${sep}` +
             common;
     } else {
         formLegend =
-            `FORM [NORMAL]${sep}` +
+            `FORMULIER [NORMAAL]${sep}` +
             `I→habit aanmaken${sep}` +
             common;
     }
@@ -53,14 +53,14 @@ function renderHotkeys() {
 
         stats:
             typeof showSkillsPanel !== 'undefined' && showSkillsPanel
-                ? `SKILLS${sep}` +
+                ? `VAARDIGHEDEN${sep}` +
                   `↑↓→navigeer categorie${sep}` +
-                  `←→→passive / active${sep}` +
-                  `ENTER→unlock / koop${sep}` +
+                  `←→→passief / actief${sep}` +
+                  `ENTER→ontgrendel / koop${sep}` +
                   `S→terug naar stats${sep}` +
                   common
-                : `STATS${sep}` +
-                  `S→open skill tree${sep}` +
+                : `STATISTIEKEN${sep}` +
+                  `S→open vaardighedenboom${sep}` +
                   common,
     };
 

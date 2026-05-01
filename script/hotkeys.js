@@ -392,14 +392,14 @@ function handlePromptInput(e, key) {
 
         let max = STAT_CATEGORIES.length - 1;
 
-        if (key === "j") {
+        if (key === "j" || key === "arrowdown") {
             categoryCursor = Math.min(max, categoryCursor + 1);
             category = STAT_CATEGORIES[categoryCursor];
             renderHabitsUI();
             return;
         }
 
-        if (key === "k") {
+        if (key === "k" || key === "arrowup") {
             categoryCursor = Math.max(0, categoryCursor - 1);
             category = STAT_CATEGORIES[categoryCursor];
             renderHabitsUI();
@@ -437,13 +437,13 @@ function handlePromptInput(e, key) {
 
         if (dayMode === "fixed") {
 
-            if (key === "j") {
+            if (key === "j" || key === "arrowdown") {
                 dayCursor = Math.min(6, dayCursor + 1);
                 renderHabitsUI();
                 return;
             }
 
-            if (key === "k") {
+            if (key === "k" || key === "arrowup") {
                 dayCursor = Math.max(0, dayCursor - 1);
                 renderHabitsUI();
                 return;
@@ -464,14 +464,14 @@ function handlePromptInput(e, key) {
 
         if (dayMode === "flex") {
 
-            if (key === "j") {
+            if (key === "j" || key === "arrowdown") {
                 timesPerWeekCursor = Math.min(6, timesPerWeekCursor + 1);
                 timesPerWeek = timesPerWeekCursor + 1;
                 renderHabitsUI();
                 return;
             }
 
-            if (key === "k") {
+            if (key === "k" || key === "arrowup") {
                 timesPerWeekCursor = Math.max(0, timesPerWeekCursor - 1);
                 timesPerWeek = timesPerWeekCursor + 1;
                 renderHabitsUI();
@@ -499,14 +499,14 @@ function handlePromptInput(e, key) {
 
         let opts = [7, 14, 35, 30, 9999];
 
-        if (key === "j") {
+        if (key === "j" || key === "arrowdown") {
             durationCursor = Math.min(4, durationCursor + 1);
             duration = opts[durationCursor];
             renderHabitsUI();
             return;
         }
 
-        if (key === "k") {
+        if (key === "k" || key === "arrowup") {
             durationCursor = Math.max(0, durationCursor - 1);
             duration = opts[durationCursor];
             renderHabitsUI();
