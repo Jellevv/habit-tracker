@@ -597,4 +597,5 @@ function renderHabitsUI() {
     renderCalendars();
     renderStats();
     renderHotkeys();
+    saveToLocalStorage();
 }

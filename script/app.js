@@ -67,4 +67,5 @@ function renderHotkeys() {
     panel.innerText = legend[focusPanel] ?? "";
 }
 
+loadFromLocalStorage();
 renderLayout();

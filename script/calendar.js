@@ -492,7 +492,8 @@ function toggleFocusedDay() {
     let habit =
         habits[selectedHabitIndex];
 
-
+    // Snapshot XP before toggle for visual feedback
+    let beforeSnap = snapshotXP();
 
     if (habit.frequencyMode === "flex") {
 
@@ -518,6 +519,7 @@ function toggleFocusedDay() {
         }
 
         renderHabitsUI();
+        showXPFeedback(beforeSnap, habit.category);
         return;
     }
 
@@ -560,6 +562,7 @@ function toggleFocusedDay() {
     }
 
     renderHabitsUI();
+    showXPFeedback(beforeSnap, habit.category);
 }
 
 
